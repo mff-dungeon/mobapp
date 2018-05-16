@@ -42,4 +42,14 @@
         android:textAlignment="center"
         app:layout_constraintTop_toTopOf="@+id/errorText"/>
 
+
+    <Button
+        android:id="@+id/retrieveButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="48dp"
+        android:text="Retrieve Test bundle"
+        android:textAlignment="center"
+        app:layout_constraintTop_toTopOf="@+id/requestButton"/>
+
 </android.support.constraint.ConstraintLayout>

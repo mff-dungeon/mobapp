@@ -1,58 +1,25 @@
 package cz.mff.mobapp.api;
 
-import org.json.JSONArray;
+import com.android.volley.NetworkResponse;
+import com.android.volley.VolleyError;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
-public class ErrorResponse extends Response {
+import java.nio.charset.StandardCharsets;
 
-    String errorMessage;
+public class ErrorResponse extends Exception {
 
-    ErrorResponse(int code, String errorMessage) {
-        super(code);
-        this.errorMessage = errorMessage;
+    final int code;
+    final String errorMessage;
+
+    ErrorResponse(VolleyError error) throws JSONException {
+        final NetworkResponse response = error.networkResponse;
+        final String data = new String(response.data, StandardCharsets.UTF_8);
+        final JSONObject object = new JSONObject(data);
+
+        this.code = response.statusCode;
+        this.errorMessage = object.getJSONObject("data").getString("detail");
     }
 
-    ErrorResponse(int code, JSONObject jsonObject) throws ServerErrorException {
-        super(code, jsonObject);
-        try {
-            this.errorMessage = response.getJSONObject("data").getString("detail");
-        } catch (JSONException e) {
-            throw wrapException(e);
-        }
-    }
-
-    @Override
-    public JSONArray getArrayData() throws ServerErrorException {
-        throw getException();
-    }
-
-    @Override
-    public JSONObject getObjectData() throws ServerErrorException {
-        throw getException();
-    }
-
-    public ServerErrorException getException() {
-        return new ServerErrorException();
-    }
-
-    public static ServerErrorException wrapException(Exception e) {
-        final ErrorResponse er = new ErrorResponse(600, e.getMessage());
-        return er.getException();
-    }
-
-    public class ServerErrorException extends Exception {
-        public int getCode() {
-            return code;
-        }
-
-        @Override
-        public String getMessage() {
-            return errorMessage;
-        }
-
-        public ErrorResponse getResponse() {
-            return ErrorResponse.this;
-        }
-    }
 }
