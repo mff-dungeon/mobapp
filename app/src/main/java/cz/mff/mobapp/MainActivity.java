@@ -5,44 +5,34 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.TextView;
 
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
-
 import org.json.JSONArray;
 
-import cz.mff.mobapp.requests.Requester;
+import cz.mff.mobapp.api.ErrorResponse;
+import cz.mff.mobapp.api.Requester;
+import cz.mff.mobapp.api.Response;
 
 public class MainActivity extends Activity {
 
     private Requester requester;
 
     private void sendRequest() {
-        requester.sendGetRequest("bundles/", new Response.Listener<JSONArray>() {
-            @Override
-            public void onResponse(JSONArray response) {
-                showResponse(response);
-            }
-        }, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
-                showError(error);
-            }
-        });
+        requester.sendGetRequest("bundles/", this::showResponse);
     }
 
-    private void showResponse(JSONArray response) {
-        ((TextView) findViewById(R.id.responseText)).setText(response.toString() + " " + response.length());
-    }
-
-    private void showError(VolleyError error) {
-        ((TextView) findViewById(R.id.errorText)).setText(error.getMessage());
+    private void showResponse(Response response) {
+        try {
+            JSONArray data = response.getArrayData();
+            ((TextView) findViewById(R.id.responseText)).setText(data.toString());
+        } catch (ErrorResponse.ServerErrorException e) {
+            ((TextView) findViewById(R.id.errorText)).setText(e.getCode() + " " + e.getMessage());
+        }
     }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        requester = new Requester();
+        requester = new Requester("test", "test");
         requester.initializeQueue(this);
 
         setContentView(R.layout.activity_main);
