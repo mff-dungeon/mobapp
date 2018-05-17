@@ -29,6 +29,8 @@ import cz.mff.mobapp.model.Storage;
 
 public class MainActivity extends Activity implements ExceptionListener {
 
+    public static final String UPDATE_DONE = "cz.mff.mobapp.UPDATE_DONE";
+
     private static final String TAG = "MainActivity";
     private Requester requester;
     private Manager<Contact, UUID> manager;
