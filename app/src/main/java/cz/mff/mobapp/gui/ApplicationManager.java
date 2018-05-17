@@ -1,9 +1,11 @@
-package cz.mff.mobapp.model;
+package cz.mff.mobapp.gui;
 
 import java.util.UUID;
 
 import cz.mff.mobapp.event.Listener;
 import cz.mff.mobapp.event.TryCatch;
+import cz.mff.mobapp.model.Identifiable;
+import cz.mff.mobapp.model.Manager;
 
 public class ApplicationManager<T extends Identifiable<UUID>> {
     private final Manager<T, UUID> databaseManager;

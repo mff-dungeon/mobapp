@@ -26,9 +26,18 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_column="0"
-        android:layout_row="1"
         android:layout_margin="2dp"
-        android:text="@string/contact_detail_modified"/>
+        android:layout_row="2"
+        android:text="@string/contact_detail_label" />
+
+    <TextView
+        android:id="@+id/textView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_column="0"
+        android:layout_margin="2dp"
+        android:layout_row="1"
+        android:text="@string/contact_detail_modified" />
 
     <TextView
         android:id="@+id/contact_detail_modified_value"
@@ -36,5 +45,13 @@
         android:layout_height="wrap_content"
         android:layout_column="1"
         android:layout_row="1"
+        android:layout_margin="2dp"/>
+
+    <TextView
+        android:id="@+id/contact_detail_label"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_column="1"
+        android:layout_row="2"
         android:layout_margin="2dp"/>
 </GridLayout>

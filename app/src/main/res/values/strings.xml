@@ -97,4 +97,5 @@
         "when a user tries to pick up one of cards.\n\n"
     </string>
     <string name="share_ticket_qr_code">QR Code</string>
+    <string name="contact_detail_label">Label</string>
 </resources>

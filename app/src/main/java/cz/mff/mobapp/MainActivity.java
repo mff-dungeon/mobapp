@@ -1,7 +1,6 @@
 package cz.mff.mobapp;
 
 import android.app.Activity;
-import android.arch.persistence.room.Room;
 import android.content.Intent;
 import android.icu.text.DateFormat;
 import android.net.Uri;
@@ -12,20 +11,13 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.util.UUID;
-import java.util.concurrent.Executors;
 
 import cz.mff.mobapp.api.Requester;
-import cz.mff.mobapp.api.SerializerFactory;
-import cz.mff.mobapp.database.AppDatabase;
-import cz.mff.mobapp.database.ContactData;
-import cz.mff.mobapp.database.DaoMapperFactory;
-import cz.mff.mobapp.database.DatabaseStorage;
 import cz.mff.mobapp.event.ExceptionListener;
 import cz.mff.mobapp.event.TryCatch;
-import cz.mff.mobapp.api.APIStorage;
+import cz.mff.mobapp.gui.ServiceFactory;
 import cz.mff.mobapp.model.Contact;
 import cz.mff.mobapp.model.Manager;
-import cz.mff.mobapp.model.Storage;
 
 public class MainActivity extends Activity implements ExceptionListener {
 
@@ -34,7 +26,6 @@ public class MainActivity extends Activity implements ExceptionListener {
     private static final String TAG = "MainActivity";
     private Requester requester;
     private Manager<Contact, UUID> manager;
-    private DatabaseStorage<Contact, ContactData> contactDatabase;
     private final UUID testBundleId = UUID.fromString("41795d9e-3cc9-4771-b88a-b0099516a753");
 
     private void sendRequest() {
@@ -57,14 +48,9 @@ public class MainActivity extends Activity implements ExceptionListener {
         requester = new Requester("test", "test");
         requester.initializeQueue(this);
 
-        Storage<Contact, UUID> storage = new APIStorage<>("contacts", requester, SerializerFactory.getContactSerializer(), Contact::new, Contact::copy);
-        manager = new Manager<>(storage, Contact::copy);
+        ServiceFactory sf = new ServiceFactory(this);
+        manager = sf.createContactManager();
 
-        AppDatabase db = Room.databaseBuilder(getApplicationContext(),
-                AppDatabase.class, "test-database2").build();
-
-        contactDatabase = new DatabaseStorage<>(db.contactDao(), Executors.newSingleThreadExecutor(),
-                DaoMapperFactory.getContactDaoMapper());
         setContentView(R.layout.activity_main);
 
         findViewById(R.id.requestButton).setOnClickListener(view -> sendRequest());

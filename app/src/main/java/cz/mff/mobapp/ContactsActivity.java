@@ -20,6 +20,7 @@ import cz.mff.mobapp.api.APIStorage;
 import cz.mff.mobapp.api.Requester;
 import cz.mff.mobapp.api.SerializerFactory;
 import cz.mff.mobapp.event.TryCatch;
+import cz.mff.mobapp.gui.ServiceFactory;
 import cz.mff.mobapp.model.Contact;
 import cz.mff.mobapp.model.Manager;
 import cz.mff.mobapp.model.Storage;
@@ -70,10 +71,8 @@ public class ContactsActivity extends Activity {
         });
         */
 
-        Requester requester = new Requester("test", "test");
-        requester.initializeQueue(this);
-        Storage<Contact, UUID> storage = new APIStorage<>("contacts", requester, SerializerFactory.getContactSerializer(), Contact::new, Contact::copy);
-        Manager<Contact, UUID> manager = new Manager<>(storage, Contact::copy);
+        ServiceFactory sf = new ServiceFactory(this);
+        Manager<Contact, UUID> manager = sf.createContactManager();
 
         loadContactData(manager);
     }
