@@ -22,7 +22,7 @@ import cz.mff.mobapp.database.DaoMapperFactory;
 import cz.mff.mobapp.database.DatabaseStorage;
 import cz.mff.mobapp.event.ExceptionListener;
 import cz.mff.mobapp.event.TryCatch;
-import cz.mff.mobapp.event.APIStorage;
+import cz.mff.mobapp.api.APIStorage;
 import cz.mff.mobapp.model.Contact;
 import cz.mff.mobapp.model.Manager;
 import cz.mff.mobapp.model.Storage;
