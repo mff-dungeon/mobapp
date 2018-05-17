@@ -2,7 +2,10 @@ package cz.mff.mobapp.api;
 
 import android.util.Log;
 
+import org.json.JSONArray;
 import org.json.JSONObject;
+
+import java.util.ArrayList;
 
 import cz.mff.mobapp.api.Requester;
 import cz.mff.mobapp.api.Serializer;
@@ -85,5 +88,21 @@ public class APIStorage<T extends Identifiable<I>, I> implements Storage<T, I> {
         requester.deleteRequest(url + "/" + id.toString() + "/", new TryCatch<>(
                 foo -> listener.doTry(null), listener
         ));
+    }
+
+    @Override
+    public void listAll(Listener<ArrayList<T>> listener) {
+        requester.getRequest(url + "/", new TryCatch<>(
+                response -> {
+                    JSONArray jsonArray = response.getArrayData();
+                    ArrayList<T> list = new ArrayList<T>(jsonArray.length());
+                    for (int i = 0; i < jsonArray.length(); i++) {
+                        T instance = factory.create();
+                        serializer.load(instance, jsonArray.getJSONObject(i));
+                        list.add(instance);
+                    }
+                    listener.doTry(list);
+                }
+        , listener));
     }
 }

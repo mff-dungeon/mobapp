@@ -57,7 +57,7 @@ public class Requester {
     private void request(int method, String url, JSONObject data, Listener<Response> listener) {
         TryCatch<JSONObject> tryListener = new TryCatch<>(
                 response -> {
-                    Log.v(TAG, "Got OK response");
+                    Log.v(TAG, "Got OK response: " + response.toString());
                     listener.doTry(new Response(response));
                 },
                 listener

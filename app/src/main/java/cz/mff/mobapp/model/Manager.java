@@ -1,5 +1,6 @@
 package cz.mff.mobapp.model;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import cz.mff.mobapp.event.Listener;
@@ -36,11 +37,11 @@ public class Manager<T extends Identifiable<I>, I> {
         storage.delete(id, listener);
     }
 
-    public void listAll(Listener<T[]> listener) {
+    public void listAll(Listener<ArrayList<T>> listener) {
         storage.listAll(listener);
     }
 
-    public void listByIDs(I[] ids, Listener<T[]> listener) {
+    public void listByIDs(I[] ids, Listener<ArrayList<T>> listener) {
         storage.listByIDs(ids, listener);
     }
 }

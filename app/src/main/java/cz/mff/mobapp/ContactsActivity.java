@@ -11,12 +11,19 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
-import java.sql.Date;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.UUID;
 
+import cz.mff.mobapp.api.APIStorage;
+import cz.mff.mobapp.api.Requester;
+import cz.mff.mobapp.api.SerializerFactory;
+import cz.mff.mobapp.event.TryCatch;
 import cz.mff.mobapp.model.Contact;
+import cz.mff.mobapp.model.Manager;
+import cz.mff.mobapp.model.Storage;
 
 public class ContactsActivity extends Activity {
 
@@ -26,7 +33,6 @@ public class ContactsActivity extends Activity {
     protected void onStart() {
         super.onStart();
 
-        loadContactData();
         /*AppDatabase db = Room.databaseBuilder(getApplicationContext(),
                 AppDatabase.class, "test-database2").build();
 
@@ -65,7 +71,12 @@ public class ContactsActivity extends Activity {
         });
         */
 
+        Requester requester = new Requester("test", "test");
+        requester.initializeQueue(this);
+        Storage<Contact, UUID> storage = new APIStorage<>("contacts", requester, SerializerFactory.getContactSerializer(), Contact::new, Contact::copy);
+        Manager<Contact, UUID> manager = new Manager<>(storage, Contact::copy);
 
+        loadContactData(manager);
     }
 
     @Override
@@ -90,80 +101,8 @@ public class ContactsActivity extends Activity {
         startActivity(intent);
     }
 
-    private void loadContactData() {
-        // TODO: Ask manager to provide the contact data - this needs to be done on another thread
-        // showContactData(new ArrayList<>());
-
-        ArrayList<Contact> testContacts = new ArrayList<>();
-        Contact c = new Contact();
-        c.setId(new UUID(4654,7864));
-        c.setLastModified(new Date(System.currentTimeMillis()));
-        testContacts.add(c);
-        c = new Contact();
-        c.setId(new UUID(7898,45688));
-        c.setLastModified(new Date(System.currentTimeMillis() - 77756));
-        testContacts.add(c);
-        c = new Contact();
-        c.setId(new UUID(12,995345));
-        c.setLastModified(new Date(System.currentTimeMillis() - 19845154));
-        testContacts.add(c);
-        c = new Contact();
-        c.setId(new UUID(4654,7864));
-        c.setLastModified(new Date(System.currentTimeMillis()));
-        testContacts.add(c);
-        c = new Contact();
-        c.setId(new UUID(7898,45688));
-        c.setLastModified(new Date(System.currentTimeMillis() - 77756));
-        testContacts.add(c);
-        c = new Contact();
-        c.setId(new UUID(12,995345));
-        c.setLastModified(new Date(System.currentTimeMillis() - 19845154));
-        testContacts.add(c);c = new Contact();
-        c.setId(new UUID(4654,7864));
-        c.setLastModified(new Date(System.currentTimeMillis()));
-        testContacts.add(c);
-        c = new Contact();
-        c.setId(new UUID(7898,45688));
-        c.setLastModified(new Date(System.currentTimeMillis() - 77756));
-        testContacts.add(c);
-        c = new Contact();
-        c.setId(new UUID(12,995345));
-        c.setLastModified(new Date(System.currentTimeMillis() - 19845154));
-        testContacts.add(c);c = new Contact();
-        c.setId(new UUID(4654,7864));
-        c.setLastModified(new Date(System.currentTimeMillis()));
-        testContacts.add(c);
-        c = new Contact();
-        c.setId(new UUID(7898,45688));
-        c.setLastModified(new Date(System.currentTimeMillis() - 77756));
-        testContacts.add(c);
-        c = new Contact();
-        c.setId(new UUID(12,995345));
-        c.setLastModified(new Date(System.currentTimeMillis() - 19845154));
-        testContacts.add(c);c = new Contact();
-        c.setId(new UUID(4654,7864));
-        c.setLastModified(new Date(System.currentTimeMillis()));
-        testContacts.add(c);
-        c = new Contact();
-        c.setId(new UUID(7898,45688));
-        c.setLastModified(new Date(System.currentTimeMillis() - 77756));
-        testContacts.add(c);
-        c = new Contact();
-        c.setId(new UUID(12,995345));
-        c.setLastModified(new Date(System.currentTimeMillis() - 19845154));
-        testContacts.add(c);c = new Contact();
-        c.setId(new UUID(4654,7864));
-        c.setLastModified(new Date(System.currentTimeMillis()));
-        testContacts.add(c);
-        c = new Contact();
-        c.setId(new UUID(7898,45688));
-        c.setLastModified(new Date(System.currentTimeMillis() - 77756));
-        testContacts.add(c);
-        c = new Contact();
-        c.setId(new UUID(12,995345));
-        c.setLastModified(new Date(System.currentTimeMillis() - 19845154));
-        testContacts.add(c);
-        showContactData(testContacts);
+    private void loadContactData(Manager<Contact, UUID> manager) {
+        manager.listAll(new TryCatch<>(this::showContactData, e -> Toast.makeText(this, e.getMessage(), Toast.LENGTH_LONG).show()));
     }
 
     // Should be run on UI Thread

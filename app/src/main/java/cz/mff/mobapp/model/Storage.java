@@ -1,5 +1,6 @@
 package cz.mff.mobapp.model;
 
+import java.util.ArrayList;
 import java.util.Collection;
 
 import cz.mff.mobapp.event.Listener;
@@ -21,11 +22,11 @@ public interface Storage<T, I> {
         listener.doCatch(new UnsupportedOperationException("No."));
     }
 
-    default void listAll(Listener<T[]> listener) {
+    default void listAll(Listener<ArrayList<T>> listener) {
         listener.doCatch(new UnsupportedOperationException("No."));
     }
 
-    default void listByIDs(I[] ids, Listener<T[]> listener) {
+    default void listByIDs(I[] ids, Listener<ArrayList<T>> listener) {
         listener.doCatch(new UnsupportedOperationException("No."));
     }
 
