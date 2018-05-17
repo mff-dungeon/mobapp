@@ -3,7 +3,9 @@ package cz.mff.mobapp;
 import android.app.Activity;
 import android.arch.persistence.room.Room;
 import android.content.Intent;
+import android.content.Intent;
 import android.icu.text.DateFormat;
+import android.net.Uri;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -64,7 +66,6 @@ public class MainActivity extends Activity implements ExceptionListener {
         contactDatabase = new DatabaseStorage<>(db.contactDao(), Executors.newSingleThreadExecutor(),
                 (from, to) -> System.out.println("test"),
                 SerializerFactory.getContactSerializer(), Contact::new);
-
         setContentView(R.layout.activity_main);
 
         findViewById(R.id.requestButton).setOnClickListener(view -> sendRequest());
@@ -80,6 +81,39 @@ public class MainActivity extends Activity implements ExceptionListener {
                 Toast.makeText(this, "Updated.", Toast.LENGTH_SHORT).show();
             }, this));
         }, this));
+
+        boolean handled = tryHandleIntent(getIntent());
+        if (!handled) {
+            askUserForTicketId();
+        }
+    }
+
+    private void askUserForTicketId() {
+        // TODO: show some kind of UI to retrieve ticket ID, then call subscribeToTicket()
+    }
+
+    private void subscribeToTicket(String ticketId) {
+        // TODO: ask backend to copy the ticket and download stuffs
+        System.out.println("subscribing to ticket: " + ticketId);
+    }
+
+    private boolean tryHandleIntent(Intent intent) {
+        if (intent == null) {
+            // no intent provided
+            return false;
+        }
+
+        String appLinkAction = intent.getAction();
+        Uri appLinkData = intent.getData();
+
+        if (appLinkData == null || !Intent.ACTION_VIEW.equals(appLinkAction)) {
+            // not app link intent
+            return false;
+        }
+
+        String ticketId = appLinkData.getLastPathSegment();
+        subscribeToTicket(ticketId);
+        return true;
     }
 
     private void retrieveBundle() {
@@ -92,5 +126,14 @@ public class MainActivity extends Activity implements ExceptionListener {
     @Override
     public void doCatch(Exception e) {
         ((TextView) findViewById(R.id.errorText)).setText(e.getMessage());
+    }
+
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+
+        boolean handled = tryHandleIntent(intent);
+        if (!handled) {
+            askUserForTicketId();
+        }
     }
 }

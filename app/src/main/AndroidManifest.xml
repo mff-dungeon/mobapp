@@ -17,6 +17,17 @@
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data
+                    android:scheme="http"
+                    android:host="mobapp-server.herokuapp.com"
+                    android:pathPattern="/subscribe/.*" />
+            </intent-filter>
         </activity>
         <activity
             android:name=".BundlesActivity"
