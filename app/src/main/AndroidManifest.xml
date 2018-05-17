@@ -24,9 +24,9 @@
                 <category android:name="android.intent.category.BROWSABLE" />
 
                 <data
-                    android:scheme="http"
                     android:host="mobapp-server.herokuapp.com"
-                    android:pathPattern="/subscribe/.*" />
+                    android:pathPattern="/subscribe/.*"
+                    android:scheme="http" />
             </intent-filter>
         </activity>
         <activity
@@ -35,9 +35,12 @@
         <activity
             android:name=".ContactDetailActivity"
             android:label="@string/title_activity_contact_detail" />
+
         <service
             android:name=".service.UpdateService"
-            android:exported="false"/>
+            android:exported="false" />
+
+        <activity android:name=".ShareTicketActivity"></activity>
     </application>
 
 </manifest>
