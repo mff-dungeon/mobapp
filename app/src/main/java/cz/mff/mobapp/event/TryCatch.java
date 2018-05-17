@@ -9,8 +9,16 @@ public class TryCatch<T> implements Listener<T> {
         this.exceptionListener = exceptionListener;
     }
 
+    public TryCatch(Listener<T> listener) {
+        this.listener = listener;
+        this.exceptionListener = listener;
+    }
+
     @Override
     public void doTry(T data) {
+        if (listener == null)
+            return;
+
         try {
             listener.doTry(data);
         } catch (Exception e) {
@@ -20,6 +28,9 @@ public class TryCatch<T> implements Listener<T> {
 
     @Override
     public void doCatch(Exception data) {
+        if (exceptionListener == null)
+            throw new Error("Ignored exception.", data);
+
         exceptionListener.doCatch(data);
     }
 }
