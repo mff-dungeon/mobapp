@@ -30,5 +30,5 @@ public interface ContactDao extends GenericDao<ContactData> {
     void update(ContactData contact);
 
     @Query("DELETE FROM contactdata WHERE id = (:id)")
-    void delete(ContactData contact);
+    void delete(UUID id);
 }

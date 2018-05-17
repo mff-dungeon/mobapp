@@ -18,6 +18,7 @@ import cz.mff.mobapp.api.Requester;
 import cz.mff.mobapp.api.SerializerFactory;
 import cz.mff.mobapp.database.AppDatabase;
 import cz.mff.mobapp.database.ContactData;
+import cz.mff.mobapp.database.DaoMapperFactory;
 import cz.mff.mobapp.database.DatabaseStorage;
 import cz.mff.mobapp.event.ExceptionListener;
 import cz.mff.mobapp.event.TryCatch;
@@ -61,8 +62,7 @@ public class MainActivity extends Activity implements ExceptionListener {
                 AppDatabase.class, "test-database2").build();
 
         contactDatabase = new DatabaseStorage<>(db.contactDao(), Executors.newSingleThreadExecutor(),
-                (from, to) -> System.out.println("test"),
-                SerializerFactory.getContactSerializer(), Contact::new);
+                DaoMapperFactory.getContactDaoMapper());
         setContentView(R.layout.activity_main);
 
         findViewById(R.id.requestButton).setOnClickListener(view -> sendRequest());
