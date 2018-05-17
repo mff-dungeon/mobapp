@@ -1,6 +1,7 @@
 package cz.mff.mobapp.event;
 
-@FunctionalInterface
-public interface Listener<T> {
-    void fire(T data) throws Exception;
+public interface Listener<T> extends TryListener<T>, ExceptionListener {
+
 }
+
+

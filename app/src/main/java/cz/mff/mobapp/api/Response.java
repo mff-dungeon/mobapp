@@ -20,7 +20,7 @@ public class Response {
 
     protected JSONObject response;
 
-    protected Response(JSONObject response) throws JSONException, IncompatibleVersionException, ParseException {
+    public Response(JSONObject response) throws JSONException, IncompatibleVersionException, ParseException {
         final int version = response.getInt("version");
 
         if (version > API_VERSION)

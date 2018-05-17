@@ -4,11 +4,9 @@ import java.util.Date;
 import java.util.UUID;
 
 import cz.mff.mobapp.api.Requester;
-import cz.mff.mobapp.api.Response;
 import cz.mff.mobapp.api.Serializer;
-import cz.mff.mobapp.event.ExceptionListener;
 import cz.mff.mobapp.event.Listener;
-import cz.mff.mobapp.event.TransformingCaller;
+import cz.mff.mobapp.event.TryCatch;
 
 public class BundleManager {
 
@@ -18,41 +16,14 @@ public class BundleManager {
         this.requester = requester;
     }
 
-    public void loadBundle(UUID id, Listener<? super Bundle> listener, ExceptionListener exceptionListener) {
-        TransformingCaller<? super Bundle, Response, Exception> caller = new TransformingCaller<>(listener, exceptionListener,
+    public void loadBundle(UUID id, Listener<? super Bundle> listener) {
+        requester.sendGetRequest("bundles/" + id.toString(), new TryCatch<>(
                 response -> {
-                    Bundle b = Serializer.loadBundle(response.getObjectData());
-                    return new Entity(b);
-                }, e -> e);
-
-        requester.sendGetRequest("bundles/" + id.toString(), caller::call, caller::exception);
-    }
-
-
-    public class Entity implements Bundle {
-        UUID id;
-        boolean isContact;
-        Date lastModified;
-
-        Entity(Bundle b) {
-            this.id = b.getId();
-            this.isContact = b.isContact();
-            this.lastModified = b.getLastModified();
-        }
-
-        @Override
-        public UUID getId() {
-            return id;
-        }
-
-        @Override
-        public boolean isContact() {
-            return isContact;
-        }
-
-        @Override
-        public Date getLastModified() {
-            return lastModified;
-        }
+                    final Bundle bundle = new Bundle();
+                    Serializer.loadBundle(bundle, response.getObjectData());
+                    listener.doTry(bundle);
+                },
+                listener
+        ));
     }
 }

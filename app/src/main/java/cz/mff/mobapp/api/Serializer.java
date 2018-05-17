@@ -11,27 +11,11 @@ import cz.mff.mobapp.model.*;
 
 public class Serializer {
 
-    public static Bundle loadBundle(JSONObject jsonObject) throws JSONException, ParseException {
-        final UUID id = UUID.fromString(jsonObject.getString("id"));
-        final boolean isContact = jsonObject.getBoolean("is_contact");
-        final Date lastModified = Response.timeFormat.parse(jsonObject.getString("last_modified"));
+    public static void loadBundle(Bundle bundle, JSONObject jsonObject) throws JSONException, ParseException {
+        assert bundle.isContact() == jsonObject.getBoolean("is_contact");
 
-        return new Bundle() {
-            @Override
-            public UUID getId() {
-                return id;
-            }
-
-            @Override
-            public boolean isContact() {
-                return isContact;
-            }
-
-            @Override
-            public Date getLastModified() {
-                return lastModified;
-            }
-        };
+        bundle.setId(UUID.fromString(jsonObject.getString("id")))
+                .setLastModified(Response.timeFormat.parse(jsonObject.getString("last_modified")));
     }
 
     public static void storeBundle(JSONObject r, Bundle bundle) throws JSONException {

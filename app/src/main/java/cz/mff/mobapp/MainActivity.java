@@ -13,6 +13,7 @@ import java.util.UUID;
 import cz.mff.mobapp.api.ErrorResponse;
 import cz.mff.mobapp.api.Requester;
 import cz.mff.mobapp.api.Response;
+import cz.mff.mobapp.event.TryCatch;
 import cz.mff.mobapp.model.BundleManager;
 
 public class MainActivity extends Activity {
@@ -21,11 +22,11 @@ public class MainActivity extends Activity {
     private BundleManager manager;
 
     private void sendRequest() {
-        requester.sendGetRequest("bundles/",
+        requester.sendGetRequest("bundles/", new TryCatch<>(
             response -> {
                 JSONArray data = response.getArrayData();
                 ((TextView) findViewById(R.id.responseText)).setText(data.toString());
-            }, e -> ((TextView) findViewById(R.id.errorText)).setText(e.getMessage()));
+            }, e -> ((TextView) findViewById(R.id.errorText)).setText(e.getMessage())));
     }
 
     @Override
@@ -45,9 +46,9 @@ public class MainActivity extends Activity {
 
     private void retrieveBundle() {
         UUID id = UUID.fromString("41795d9e-3cc9-4771-b88a-b0099516a753");
-        manager.loadBundle(id, bundle -> {
+        manager.loadBundle(id, new TryCatch<>(bundle -> {
             String currentDateTimeString = DateFormat.getDateTimeInstance().format(bundle.getLastModified());
             ((TextView) findViewById(R.id.responseText)).setText("Last modified at " + currentDateTimeString);
-        }, e -> ((TextView) findViewById(R.id.errorText)).setText(e.getMessage()));
+        }, e -> ((TextView) findViewById(R.id.errorText)).setText(e.getMessage())));
     }
 }

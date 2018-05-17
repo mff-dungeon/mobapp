@@ -15,9 +15,8 @@ import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
 import java.util.Map;
 
-import cz.mff.mobapp.event.ExceptionListener;
 import cz.mff.mobapp.event.Listener;
-import cz.mff.mobapp.event.TransformingCaller;
+import cz.mff.mobapp.event.TryCatch;
 
 public class Requester {
 
@@ -52,13 +51,20 @@ public class Requester {
         queue.stop();
     }
 
-    public void sendGetRequest(String url, Listener<Response> listener, ExceptionListener exceptionListener) {
-        TransformingCaller<Response, JSONObject, VolleyError> caller = new TransformingCaller<>(listener, exceptionListener, Response::new, ErrorResponse::new);
+    public void sendGetRequest(String url, Listener<Response> listener) {
+        TryCatch<JSONObject> tryListener = new TryCatch<>(
+                response -> listener.doTry(new Response(response)),
+                listener
+        );
+        TryCatch<VolleyError> catchListener = new TryCatch<>(
+                error -> listener.doCatch(new ErrorResponse(error)),
+                listener
+        );
         final JsonObjectRequest jsonRequest = new JsonObjectRequest(Request.Method.GET,
                 API + url,
                 null,
-                caller::call,
-                caller::exception
+                tryListener::safeTry,
+                catchListener::safeTry
             )
         {
             @Override
