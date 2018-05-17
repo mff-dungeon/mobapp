@@ -3,7 +3,7 @@ package cz.mff.mobapp.model;
 import java.util.Date;
 import java.util.UUID;
 
-public class Bundle {
+public class Bundle implements Identifiable<UUID>, Updatable<Bundle> {
 
     private UUID id;
     private Boolean isContact;
@@ -13,9 +13,8 @@ public class Bundle {
         return id;
     }
 
-    public Bundle setId(UUID id) {
+    public void setId(UUID id) {
         this.id = id;
-        return this;
     }
 
     public Date getLastModified() {
@@ -36,7 +35,7 @@ public class Bundle {
         return this;
     }
 
-    void loadFrom(Bundle bundle) {
+    public void loadFrom(Bundle bundle) {
         if (bundle.getId() != null)
             setId(bundle.getId());
         if (bundle.getLastModified() != null)

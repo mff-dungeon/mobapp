@@ -11,11 +11,11 @@ public interface Storage<T, I> {
         listener.doCatch(new UnsupportedOperationException("No."));
     }
 
-    default void create(T object, Listener<T> listener) {
+    default void create(T object, Listener<? super T> listener) {
         listener.doCatch(new UnsupportedOperationException("No."));
     }
 
-    default void update(T object, Listener<T> listener) {
+    default void update(T object, Listener<? super T> listener) {
         listener.doCatch(new UnsupportedOperationException("No."));
     }
 }

@@ -14,9 +14,10 @@ public class SerializerFactory {
         return new Serializer<Bundle>() {
             @Override
             public void load(Bundle bundle, JSONObject jsonObject) throws JSONException, ParseException {
-                bundle.setId(UUID.fromString(jsonObject.getString("id")))
-                        .setContact(jsonObject.getBoolean("is_contact"))
-                        .setLastModified(Response.timeFormat.parse(jsonObject.getString("last_modified")));
+                bundle
+                    .setContact(jsonObject.getBoolean("is_contact"))
+                    .setLastModified(Response.timeFormat.parse(jsonObject.getString("last_modified")))
+                    .setId(UUID.fromString(jsonObject.getString("id")));
             }
 
             @Override
