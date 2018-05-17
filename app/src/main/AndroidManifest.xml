@@ -30,8 +30,11 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".BundlesActivity"
-            android:label="@string/title_activity_bundles"></activity>
+            android:name=".ContactsActivity"
+            android:label="@string/title_activity_contacts" />
+        <activity
+            android:name=".ContactDetailActivity"
+            android:label="@string/title_activity_contact_detail" />
     </application>
 
 </manifest>

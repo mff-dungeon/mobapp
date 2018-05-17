@@ -12,7 +12,6 @@ import android.widget.Toast;
 import org.json.JSONArray;
 
 import java.util.UUID;
-import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
 import cz.mff.mobapp.api.Requester;
@@ -23,7 +22,6 @@ import cz.mff.mobapp.database.DatabaseStorage;
 import cz.mff.mobapp.event.ExceptionListener;
 import cz.mff.mobapp.event.TryCatch;
 import cz.mff.mobapp.event.APIStorage;
-import cz.mff.mobapp.event.Updater;
 import cz.mff.mobapp.model.Bundle;
 import cz.mff.mobapp.model.Contact;
 import cz.mff.mobapp.model.Manager;
@@ -45,7 +43,7 @@ public class MainActivity extends Activity implements ExceptionListener {
     }
 
     private void showBundlesActivity() {
-        Intent intent = new Intent(this, BundlesActivity.class);
+        Intent intent = new Intent(this, ContactsActivity.class);
         startActivity(intent);
     }
 
