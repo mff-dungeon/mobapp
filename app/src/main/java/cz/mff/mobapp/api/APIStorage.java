@@ -7,8 +7,7 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 
-import cz.mff.mobapp.api.Requester;
-import cz.mff.mobapp.api.Serializer;
+import cz.mff.mobapp.event.ExceptionListener;
 import cz.mff.mobapp.event.Listener;
 import cz.mff.mobapp.event.TryCatch;
 import cz.mff.mobapp.model.Factory;
@@ -33,14 +32,29 @@ public class APIStorage<T extends Identifiable<I>, I> implements Storage<T, I> {
         this.updater = updater;
     }
 
+    private T createInstance(JSONObject jsonObject) throws Exception {
+        T instance = factory.create();
+        serializer.load(instance, jsonObject);
+        return instance;
+    }
+
+    private T updateInstance(T instance, JSONObject jsonObject) throws Exception {
+        T updated = createInstance(jsonObject);
+        updater.update(updated, instance);
+        return instance;
+    }
+
+    private ArrayList<T> createList(JSONArray jsonArray) throws Exception {
+        ArrayList<T> list = new ArrayList<>(jsonArray.length());
+        for (int i = 0; i < jsonArray.length(); i++)
+            list.add(createInstance(jsonArray.getJSONObject(i)));
+        return list;
+    }
+
     @Override
     public void retrieve(I id, Listener<? super T> listener) {
         requester.getRequest(url + "/" + id.toString() + "/", new TryCatch<>(
-                response -> {
-                    T instance = factory.create();
-                    serializer.load(instance, response.getObjectData());
-                    listener.doTry(instance);
-                },
+                response -> listener.doTry(createInstance(response.getObjectData())),
                 listener
         ));
     }
@@ -52,12 +66,8 @@ public class APIStorage<T extends Identifiable<I>, I> implements Storage<T, I> {
             JSONObject jsonObject = new JSONObject();
             serializer.store(object, jsonObject);
             requester.putRequest(url + "/" + id.toString() + "/", jsonObject, new TryCatch<>(
-                    response -> {
-                        T updated = factory.create();
-                        serializer.load(updated, response.getObjectData());
-                        updater.update(updated, object);
-                        listener.doTry(object);
-                    }, listener));
+                    response -> listener.doTry(updateInstance(object, response.getObjectData())),
+                    listener));
         } catch (Exception e) {
             listener.doCatch(e);
         }
@@ -71,13 +81,8 @@ public class APIStorage<T extends Identifiable<I>, I> implements Storage<T, I> {
             JSONObject jsonObject = new JSONObject();
             serializer.store(object, jsonObject);
             requester.postRequest(url + "/", jsonObject, new TryCatch<>(
-                    response -> {
-                        Log.v(TAG, "Created " + response.getObjectData().toString());
-                        T updated = factory.create();
-                        serializer.load(updated, response.getObjectData());
-                        updater.update(updated, object);
-                        listener.doTry(object);
-                    }, listener));
+                    response -> listener.doTry(updateInstance(object, response.getObjectData())),
+                    listener));
         } catch (Exception e) {
             listener.doCatch(e);
         }
@@ -86,23 +91,16 @@ public class APIStorage<T extends Identifiable<I>, I> implements Storage<T, I> {
     @Override
     public void delete(I id, Listener<Void> listener) {
         requester.deleteRequest(url + "/" + id.toString() + "/", new TryCatch<>(
-                foo -> listener.doTry(null), listener
+                foo -> listener.doTry(null),
+                listener
         ));
     }
 
     @Override
     public void listAll(Listener<ArrayList<T>> listener) {
         requester.getRequest(url + "/", new TryCatch<>(
-                response -> {
-                    JSONArray jsonArray = response.getArrayData();
-                    ArrayList<T> list = new ArrayList<T>(jsonArray.length());
-                    for (int i = 0; i < jsonArray.length(); i++) {
-                        T instance = factory.create();
-                        serializer.load(instance, jsonArray.getJSONObject(i));
-                        list.add(instance);
-                    }
-                    listener.doTry(list);
-                }
-        , listener));
+                response -> listener.doTry(createList(response.getArrayData())),
+                listener
+        ));
     }
 }
