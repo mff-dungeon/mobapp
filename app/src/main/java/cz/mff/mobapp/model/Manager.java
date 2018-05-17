@@ -1,5 +1,7 @@
 package cz.mff.mobapp.model;
 
+import java.util.List;
+
 import cz.mff.mobapp.event.Listener;
 import cz.mff.mobapp.event.TryCatch;
 
@@ -32,5 +34,13 @@ public class Manager<T extends Identifiable<I>, I> {
 
     public void delete(I id, Listener<Void> listener) {
         storage.delete(id, listener);
+    }
+
+    public void listAll(Listener<T[]> listener) {
+        storage.listAll(listener);
+    }
+
+    public void listByIDs(I[] ids, Listener<T[]> listener) {
+        storage.listByIDs(ids, listener);
     }
 }
