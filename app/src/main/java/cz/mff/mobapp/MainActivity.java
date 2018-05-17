@@ -9,6 +9,7 @@ import android.util.Log;
 import android.widget.TextView;
 
 import org.json.JSONArray;
+import org.json.JSONObject;
 
 import java.util.UUID;
 import java.util.concurrent.Executors;
@@ -69,6 +70,11 @@ public class MainActivity extends Activity implements ExceptionListener {
         findViewById(R.id.updateButton).setOnClickListener(view -> updateBundle());
         findViewById(R.id.bundleButton).setOnClickListener(view -> showBundlesActivity());
         findViewById(R.id.createDeleteButton).setOnClickListener(view -> createDeleteBundle());
+
+        boolean handled = tryHandleIntent(getIntent());
+        if (!handled) {
+            askUserForTicketId();
+        }
     }
 
     private void updateBundle() {
@@ -77,11 +83,6 @@ public class MainActivity extends Activity implements ExceptionListener {
                 ((TextView) findViewById(R.id.responseText)).setText("Updated.");
             }, this));
         }, this));
-
-        boolean handled = tryHandleIntent(getIntent());
-        if (!handled) {
-            askUserForTicketId();
-        }
     }
 
     private void askUserForTicketId() {
@@ -89,8 +90,19 @@ public class MainActivity extends Activity implements ExceptionListener {
     }
 
     private void subscribeToTicket(String ticketId) {
-        // TODO: ask backend to copy the ticket and download stuffs
-        System.out.println("subscribing to ticket: " + ticketId);
+        System.out.printf("cloning ticket %s\n", ticketId);
+        requester.putRequest(String.format("clone/%s/", ticketId), new JSONObject(),
+            new TryCatch<>(
+                response -> {
+                    JSONObject data = response.getObjectData();
+                    System.out.printf("ticket clone succeeded, clone has id: %s\n", data.get("id"));
+
+                    // TODO: sync data store from the backend
+                }, err -> {
+                    System.out.println("ticket clone failed");
+
+                    // TODO: show UI to indicate failure
+                }));
     }
 
     private boolean tryHandleIntent(Intent intent) {
