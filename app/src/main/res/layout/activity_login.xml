@@ -6,43 +6,69 @@
     android:layout_height="match_parent"
     tools:context=".LoginActivity">
 
-    <EditText
-        android:id="@+id/emailView"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginEnd="40dp"
-        android:layout_marginStart="40dp"
-        android:layout_marginTop="40dp"
-        android:ems="10"
-        android:hint="E-mail"
-        android:inputType="textEmailAddress"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
-    <EditText
-        android:id="@+id/passwordView"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginEnd="40dp"
-        android:layout_marginStart="40dp"
-        android:layout_marginTop="20dp"
-        android:ems="10"
-        android:hint="Password"
-        android:inputType="textPassword"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/emailView" />
-
-    <Button
-        android:id="@+id/loginButton"
+    <LinearLayout
+        android:id="@+id/login_status"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginEnd="40dp"
-        android:layout_marginStart="40dp"
-        android:layout_marginTop="20dp"
-        android:text="Sign In"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/passwordView" />
+        android:layout_gravity="center"
+        android:gravity="center_horizontal"
+        android:orientation="vertical"
+        android:visibility="gone" >
+
+        <ProgressBar
+            style="?android:attr/progressBarStyleLarge"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="8dp" />
+
+        <TextView
+            android:id="@+id/login_status_message"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
+            android:fontFamily="sans-serif-light"
+            android:text="@string/login_progress_signing_in"
+            android:textAppearance="?android:attr/textAppearanceMedium" />
+    </LinearLayout>
+
+    <ScrollView
+        android:id="@+id/login_form"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" >
+
+        <LinearLayout
+            android:orientation="vertical"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <EditText
+                android:id="@+id/email"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="@string/prompt_email"
+                android:inputType="textEmailAddress"
+                android:maxLines="1"
+                android:singleLine="true" />
+
+            <EditText
+                android:id="@+id/password"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="@string/prompt_password"
+                android:inputType="textPassword"
+                android:maxLines="1"
+                android:singleLine="true" />
+
+            <Button
+                android:id="@+id/sign_in_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="right"
+                android:layout_marginTop="16dp"
+                android:paddingStart="32dp"
+                android:paddingEnd="32dp"
+                android:text="@string/action_sign_in_register" />
+        </LinearLayout>
+    </ScrollView>
+
 </android.support.constraint.ConstraintLayout>
