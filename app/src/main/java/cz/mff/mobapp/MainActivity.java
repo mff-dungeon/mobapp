@@ -72,7 +72,7 @@ public class MainActivity extends Activity implements ExceptionListener {
         findViewById(R.id.updateButton).setOnClickListener(view -> updateBundle());
         findViewById(R.id.bundleButton).setOnClickListener(view -> showBundlesActivity());
         findViewById(R.id.createDeleteButton).setOnClickListener(view -> createDeleteBundle());
-        findViewById(R.id.shareTicketButton).setOnClickListener(view -> shareTicket());
+        findViewById(R.id.shareTicketButton).setOnClickListener(view -> shareTicket("33319b2f-f891-40b0-a23f-bcdaa9b71857"));
 
         boolean handled = tryHandleIntent(getIntent());
         if (!handled) {
@@ -164,8 +164,9 @@ public class MainActivity extends Activity implements ExceptionListener {
         }
     }
 
-    private void shareTicket() {
+    private void shareTicket(String ticketId) {
         Intent intent = new Intent(this, ShareTicketActivity.class);
+        intent.putExtra(ShareTicketActivity.TICKET_ID, ticketId);
         startActivity(intent);
     }
 
