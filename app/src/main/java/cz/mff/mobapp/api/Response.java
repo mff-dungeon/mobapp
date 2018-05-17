@@ -14,7 +14,7 @@ import java.util.Date;
 public class Response {
 
     public final int API_VERSION = 1;
-    static final DateFormat timeFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.sss'Z'");
+    static final DateFormat timeFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
     private final int code;
 
     protected Date time;
