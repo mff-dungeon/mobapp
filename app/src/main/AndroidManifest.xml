@@ -40,7 +40,8 @@
             android:name=".service.UpdateService"
             android:exported="false" />
 
-        <activity android:name=".ShareTicketActivity"></activity>
+        <activity android:name=".ShareTicketActivity" />
+        <activity android:name=".LoginActivity"></activity>
     </application>
 
 </manifest>
