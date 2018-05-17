@@ -78,8 +78,8 @@ public class Requester {
                 method,
                 API + url,
                 data,
-                tryListener::safeTry,
-                catchListener::safeTry
+                tryListener::doTry,
+                catchListener::doTry
         )
         {
             @Override

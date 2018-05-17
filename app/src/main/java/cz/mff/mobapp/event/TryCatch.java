@@ -9,17 +9,13 @@ public class TryCatch<T> implements Listener<T> {
         this.exceptionListener = exceptionListener;
     }
 
-    public void safeTry(T data) {
+    @Override
+    public void doTry(T data) {
         try {
             listener.doTry(data);
         } catch (Exception e) {
             exceptionListener.doCatch(e);
         }
-    }
-
-    @Override
-    public void doTry(T data) throws Exception {
-        listener.doTry(data);
     }
 
     @Override
