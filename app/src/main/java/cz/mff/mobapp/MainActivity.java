@@ -1,9 +1,15 @@
 package cz.mff.mobapp;
 
+import android.accounts.Account;
+import android.accounts.AccountManager;
+import android.accounts.AccountManagerCallback;
+import android.accounts.AccountManagerFuture;
 import android.app.Activity;
 import android.content.Intent;
 import android.icu.text.DateFormat;
 import android.net.Uri;
+import android.os.Bundle;
+import android.os.OperationCanceledException;
 import android.util.Log;
 import android.widget.TextView;
 
@@ -13,6 +19,13 @@ import org.json.JSONObject;
 import java.util.UUID;
 
 import cz.mff.mobapp.api.Requester;
+import cz.mff.mobapp.api.SerializerFactory;
+import cz.mff.mobapp.auth.AccountUtils;
+import cz.mff.mobapp.auth.AuthPreferences;
+import cz.mff.mobapp.database.AppDatabase;
+import cz.mff.mobapp.database.ContactData;
+import cz.mff.mobapp.database.DaoMapperFactory;
+import cz.mff.mobapp.database.DatabaseStorage;
 import cz.mff.mobapp.event.ExceptionListener;
 import cz.mff.mobapp.event.TryCatch;
 import cz.mff.mobapp.gui.ServiceFactory;
@@ -24,9 +37,15 @@ public class MainActivity extends Activity implements ExceptionListener {
     public static final String UPDATE_DONE = "cz.mff.mobapp.UPDATE_DONE";
 
     private static final String TAG = "MainActivity";
+    private static final int REQ_SIGNUP = 1;
+
     private Requester requester;
     private Manager<Contact, UUID> manager;
     private final UUID testBundleId = UUID.fromString("41795d9e-3cc9-4771-b88a-b0099516a753");
+
+    private AccountManager mAccountManager;
+    private AuthPreferences mAuthPreferences;
+    private String authToken;
 
     private void sendRequest() {
         requester.getRequest("bundles/", new TryCatch<>(
@@ -45,6 +64,10 @@ public class MainActivity extends Activity implements ExceptionListener {
     protected void onCreate(android.os.Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        authToken = null;
+        mAuthPreferences = new AuthPreferences(this);
+        mAccountManager = AccountManager.get(this);
+
         requester = new Requester("test", "test");
         requester.initializeQueue(this);
 
@@ -59,12 +82,55 @@ public class MainActivity extends Activity implements ExceptionListener {
         findViewById(R.id.bundleButton).setOnClickListener(view -> showBundlesActivity());
         findViewById(R.id.createDeleteButton).setOnClickListener(view -> createDeleteBundle());
         findViewById(R.id.shareTicketButton).setOnClickListener(view -> shareTicket("33319b2f-f891-40b0-a23f-bcdaa9b71857"));
-        findViewById(R.id.loginButton).setOnClickListener(view -> login());
 
         boolean handled = tryHandleIntent(getIntent());
         if (!handled) {
             askUserForTicketId();
         }
+
+        mAccountManager.getAuthTokenByFeatures(AccountUtils.ACCOUNT_TYPE, AccountUtils.AUTH_TOKEN_TYPE, null, this, null, null, new GetAuthTokenCallback(), null);
+    }
+
+    private class GetAuthTokenCallback implements AccountManagerCallback<Bundle> {
+
+        @Override
+        public void run(AccountManagerFuture<Bundle> result) {
+            Bundle bundle;
+
+            try {
+                bundle = result.getResult();
+
+                final Intent intent = (Intent) bundle.get(AccountManager.KEY_INTENT);
+                if (null != intent) {
+                    startActivityForResult(intent, REQ_SIGNUP);
+                } else {
+                    authToken = bundle.getString(AccountManager.KEY_AUTHTOKEN);
+                    final String accountName = bundle.getString(AccountManager.KEY_ACCOUNT_NAME);
+
+                    // Save session username & auth token
+                    mAuthPreferences.setAuthToken(authToken);
+                    mAuthPreferences.setUsername(accountName);
+
+                    System.out.println("[auth] Retrieved auth token: " + authToken);
+                    System.out.println("[auth] Saved account name: " + mAuthPreferences.getAccountName());
+                    System.out.println("[auth] Saved auth token: " + mAuthPreferences.getAuthToken());
+
+                    // If the logged account didn't exist, we need to create it on the device
+                    Account account = AccountUtils.getAccount(MainActivity.this, accountName);
+                    if (null == account) {
+                        account = new Account(accountName, AccountUtils.ACCOUNT_TYPE);
+                        mAccountManager.addAccountExplicitly(account, bundle.getString(LoginActivity.PARAM_USER_PASSWORD), null);
+                        mAccountManager.setAuthToken(account, AccountUtils.AUTH_TOKEN_TYPE, authToken);
+                    }
+                }
+            } catch(OperationCanceledException e) {
+                // If signup was cancelled, force activity termination
+                finish();
+            } catch(Exception e) {
+                e.printStackTrace();
+            }
+        }
+
     }
 
     private void updateBundle() {
@@ -154,11 +220,6 @@ public class MainActivity extends Activity implements ExceptionListener {
     private void shareTicket(String ticketId) {
         Intent intent = new Intent(this, ShareTicketActivity.class);
         intent.putExtra(ShareTicketActivity.TICKET_ID, ticketId);
-        startActivity(intent);
-    }
-
-    private void login() {
-        Intent intent = new Intent(this, LoginActivity.class);
         startActivity(intent);
     }
 
