@@ -2,7 +2,9 @@ package cz.mff.mobapp.api;
 
 import android.content.Context;
 import android.util.Base64;
+import android.util.Log;
 
+import com.android.volley.ParseError;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.VolleyError;
@@ -21,6 +23,7 @@ import cz.mff.mobapp.event.TryCatch;
 public class Requester {
 
     private static final String API = "http://mobapp-server.herokuapp.com/api/";
+    private static final String TAG = "requester";
 
     final String username, password;
 
@@ -51,21 +54,33 @@ public class Requester {
         queue.stop();
     }
 
-    public void sendGetRequest(String url, Listener<Response> listener) {
+    private void request(int method, String url, JSONObject data, Listener<Response> listener) {
         TryCatch<JSONObject> tryListener = new TryCatch<>(
-                response -> listener.doTry(new Response(response)),
+                response -> {
+                    Log.v(TAG, "Got OK response");
+                    listener.doTry(new Response(response));
+                },
                 listener
         );
         TryCatch<VolleyError> catchListener = new TryCatch<>(
-                error -> listener.doCatch(new ErrorResponse(error)),
+                error -> {
+                    if (error instanceof ParseError) {
+                        // HACK! Fucking volley cannot tell 204 apart from error.
+                        listener.doTry(new Response(204));
+                        return;
+                    }
+                    Log.v(TAG, "Got error response");
+                    listener.doCatch(new ErrorResponse(error));
+                },
                 listener
         );
-        final JsonObjectRequest jsonRequest = new JsonObjectRequest(Request.Method.GET,
+        final JsonObjectRequest jsonRequest = new JsonObjectRequest(
+                method,
                 API + url,
-                null,
+                data,
                 tryListener::safeTry,
                 catchListener::safeTry
-            )
+        )
         {
             @Override
             public Map<String, String> getHeaders() {
@@ -75,7 +90,25 @@ public class Requester {
             }
         };
 
+        Log.v(TAG, "Sending request...");
+
         queue.add(jsonRequest);
+    }
+
+    public void getRequest(String url, Listener<Response> listener) {
+        request(Request.Method.GET, url, null, listener);
+    }
+
+    public void putRequest(String url, JSONObject jsonObject, Listener<Response> listener) {
+        request(Request.Method.PUT, url, jsonObject, listener);
+    }
+
+    public void postRequest(String url, JSONObject jsonObject, Listener<Response> listener) {
+        request(Request.Method.POST, url, jsonObject, listener);
+    }
+
+    public void deleteRequest(String url, Listener<Response> listener) {
+        request(Request.Method.DELETE, url, null, listener);
     }
 
 }

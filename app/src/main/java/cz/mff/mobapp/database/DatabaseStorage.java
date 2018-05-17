@@ -5,7 +5,7 @@ import java.util.concurrent.Executor;
 
 import cz.mff.mobapp.api.Serializer;
 import cz.mff.mobapp.event.Listener;
-import cz.mff.mobapp.event.Updater;
+import cz.mff.mobapp.model.Updater;
 import cz.mff.mobapp.model.Factory;
 import cz.mff.mobapp.model.Identifiable;
 import cz.mff.mobapp.model.Storage;

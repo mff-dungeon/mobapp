@@ -25,6 +25,7 @@ public class SerializerFactory {
             public void store(Bundle bundle, JSONObject jsonObject) throws JSONException {
                 jsonObject.put("id", bundle.getId().toString());
                 jsonObject.put("is_contact", bundle.isContact());
+                jsonObject.put("last_modified", bundle.getLastModified());
             }
         };
     }
@@ -32,17 +33,19 @@ public class SerializerFactory {
     public static Serializer<Contact> getContactSerializer() {
         return new Serializer<Contact>() {
             @Override
-            public void load(Contact contact, JSONObject jsonObject) throws JSONException, ParseException {
-                contact
-                        .setContact(jsonObject.getBoolean("is_contact"))
-                        .setLastModified(Response.timeFormat.parse(jsonObject.getString("last_modified")))
+            public void load(Contact contact, JSONObject jsonObject) throws Exception {
+                contact.setLastModified(Response.timeFormat.parse(jsonObject.getString("last_modified")))
                         .setId(UUID.fromString(jsonObject.getString("id")));
+                // TODO: add Contact specific
             }
 
             @Override
-            public void store(Contact contact, JSONObject jsonObject) throws JSONException {
-                jsonObject.put("id", contact.getId().toString());
-                jsonObject.put("is_contact", contact.isContact());
+            public void store(Contact contact, JSONObject jsonObject) throws Exception {
+                if (contact.getId() != null)
+                    jsonObject.put("id", contact.getId().toString());
+                if (contact.getLastModified() != null)
+                    jsonObject.put("last_modified", contact.getLastModified());
+                // TODO: add Contact specific
             }
         };
     }

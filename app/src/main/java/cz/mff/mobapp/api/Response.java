@@ -15,10 +15,15 @@ public class Response {
 
     public final int API_VERSION = 1;
     static final DateFormat timeFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.sss'Z'");
+    private final int code;
 
     protected Date time;
 
     protected JSONObject response;
+
+    public Response(int code) {
+        this.code = code;
+    }
 
     public Response(JSONObject response) throws JSONException, IncompatibleVersionException, ParseException {
         final int version = response.getInt("version");
@@ -28,6 +33,7 @@ public class Response {
 
         time = timeFormat.parse(response.getString("server_time"));
         this.response = response;
+        this.code = 200;
     }
 
     public JSONObject getObjectData() throws JSONException {
@@ -36,5 +42,9 @@ public class Response {
 
     public JSONArray getArrayData() throws JSONException {
         return response.getJSONArray("data");
+    }
+
+    public int getCode() {
+        return code;
     }
 }

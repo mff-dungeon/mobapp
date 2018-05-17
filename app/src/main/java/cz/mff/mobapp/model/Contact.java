@@ -5,4 +5,8 @@ public class Contact extends Bundle {
     public Boolean isContact() {
         return true;
     }
+
+    public static void copy(Contact from, Contact to) {
+        Bundle.copy(from, to);
+    }
 }
