@@ -14,7 +14,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.UUID;
 
 import cz.mff.mobapp.api.APIStorage;
@@ -113,13 +112,8 @@ public class ContactsActivity extends Activity {
             @Override
             public View getView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {
                 TextView view = (TextView) super.getView(position, convertView, parent);
-                UUID id = getItem(position).getId();
-                if (id != null) {
-                    view.setText(id.toString());
-                }
-                else {
-                    view.setText("NULL");
-                }
+                String label = getItem(position).getLabel();
+                view.setText(label != null ? label : "No label, WTF?");
                 return view;
             }
         };

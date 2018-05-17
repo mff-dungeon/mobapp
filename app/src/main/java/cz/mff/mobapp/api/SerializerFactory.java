@@ -34,13 +34,16 @@ public class SerializerFactory {
         return new Serializer<Contact>() {
             @Override
             public void load(Contact contact, JSONObject jsonObject) throws Exception {
-                contact.setLastModified(Response.timeFormat.parse(jsonObject.getString("last_modified")))
+                contact
+                        .setLabel(jsonObject.getString("label"))
+                        .setLastModified(Response.timeFormat.parse(jsonObject.getString("last_modified")))
                         .setId(UUID.fromString(jsonObject.getString("id")));
-                // TODO: add Contact specific
             }
 
             @Override
             public void store(Contact contact, JSONObject jsonObject) throws Exception {
+                if (contact.getLabel() != null)
+                    jsonObject.put("label", contact.getLabel());
                 if (contact.getId() != null)
                     jsonObject.put("id", contact.getId().toString());
                 if (contact.getLastModified() != null)
