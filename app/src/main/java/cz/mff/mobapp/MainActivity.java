@@ -1,6 +1,8 @@
 package cz.mff.mobapp;
 
 import android.app.Activity;
+import android.arch.persistence.room.Room;
+import android.content.Intent;
 import android.icu.text.DateFormat;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -8,13 +10,20 @@ import android.widget.Toast;
 import org.json.JSONArray;
 
 import java.util.UUID;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 
 import cz.mff.mobapp.api.Requester;
 import cz.mff.mobapp.api.SerializerFactory;
+import cz.mff.mobapp.database.AppDatabase;
+import cz.mff.mobapp.database.ContactData;
+import cz.mff.mobapp.database.DatabaseStorage;
 import cz.mff.mobapp.event.ExceptionListener;
 import cz.mff.mobapp.event.TryCatch;
 import cz.mff.mobapp.event.APIStorage;
+import cz.mff.mobapp.event.Updater;
 import cz.mff.mobapp.model.Bundle;
+import cz.mff.mobapp.model.Contact;
 import cz.mff.mobapp.model.Manager;
 import cz.mff.mobapp.model.Storage;
 
@@ -22,6 +31,7 @@ public class MainActivity extends Activity implements ExceptionListener {
 
     private Requester requester;
     private Manager<Bundle, UUID> manager;
+    private DatabaseStorage<Contact, ContactData> contactDatabase;
     private final UUID testBundleId = UUID.fromString("41795d9e-3cc9-4771-b88a-b0099516a753");
 
     private void sendRequest() {
@@ -30,6 +40,11 @@ public class MainActivity extends Activity implements ExceptionListener {
                 JSONArray data = response.getArrayData();
                 ((TextView) findViewById(R.id.responseText)).setText(data.toString());
             }, this));
+    }
+
+    private void showBundlesActivity() {
+        Intent intent = new Intent(this, BundlesActivity.class);
+        startActivity(intent);
     }
 
     @Override
@@ -41,19 +56,29 @@ public class MainActivity extends Activity implements ExceptionListener {
 
         Storage<Bundle, UUID> storage = new APIStorage<>("bundles", requester, SerializerFactory.getBundleSerializer(), Bundle::new);
         manager = new Manager<>(storage);
-        
+
+        AppDatabase db = Room.databaseBuilder(getApplicationContext(),
+                AppDatabase.class, "test-database2").build();
+
+
+        contactDatabase = new DatabaseStorage<>(db.contactDao(), Executors.newSingleThreadExecutor(),
+                (from, to) -> System.out.println("test"),
+                SerializerFactory.getContactSerializer(), Contact::new);
+
         setContentView(R.layout.activity_main);
 
         findViewById(R.id.requestButton).setOnClickListener(view -> sendRequest());
         findViewById(R.id.retrieveButton).setOnClickListener(view -> retrieveBundle());
         findViewById(R.id.updateButton).setOnClickListener(view -> updateBundle());
+        findViewById(R.id.bundleButton).setOnClickListener(view -> showBundlesActivity());
+
     }
 
     private void updateBundle() {
         manager.retrieve(testBundleId, new TryCatch<Bundle>(bundle -> {
-                manager.save(bundle, new TryCatch<Bundle>(bundle1 -> {
-                    Toast.makeText(this, "Updated.", Toast.LENGTH_SHORT).show();
-                }, this));
+            manager.save(bundle, new TryCatch<Bundle>(bundle1 -> {
+                Toast.makeText(this, "Updated.", Toast.LENGTH_SHORT).show();
+            }, this));
         }, this));
     }
 

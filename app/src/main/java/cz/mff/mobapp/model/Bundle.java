@@ -5,7 +5,7 @@ import java.util.UUID;
 
 public class Bundle implements Identifiable<UUID>, Updatable<Bundle> {
 
-    private UUID id;
+    private UUID id = null;
     private Boolean isContact;
     private Date lastModified;
 

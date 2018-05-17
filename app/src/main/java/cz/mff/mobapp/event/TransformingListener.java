@@ -32,5 +32,4 @@ public class TransformingListener<S, T> implements Listener<S> {
     public interface Transformer<F, T> {
         T transform(F from) throws Exception;
     }
-
 }
