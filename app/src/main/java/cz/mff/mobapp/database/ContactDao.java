@@ -4,6 +4,7 @@ import android.arch.persistence.room.Dao;
 import android.arch.persistence.room.Delete;
 import android.arch.persistence.room.Insert;
 import android.arch.persistence.room.Query;
+import android.arch.persistence.room.Update;
 
 import java.util.List;
 import java.util.UUID;
@@ -22,6 +23,12 @@ public interface ContactDao extends GenericDao<ContactData> {
     @Insert
     void insertAll(ContactData... contact);
 
-    @Delete
+    @Insert
+    void insert(ContactData contact);
+
+    @Update
+    void update(ContactData contact);
+
+    @Query("DELETE FROM contactdata WHERE id = (:id)")
     void delete(ContactData contact);
 }

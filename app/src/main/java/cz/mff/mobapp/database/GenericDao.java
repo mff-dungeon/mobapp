@@ -10,7 +10,11 @@ public interface GenericDao<T> {
 
     T findById(UUID uuid);
 
-    void insertAll(T... contact);
+    void insert(T object);
 
-    void delete(T contact);
+    void insertAll(T... object);
+
+    void update(T object);
+
+    void delete(UUID id);
 }
