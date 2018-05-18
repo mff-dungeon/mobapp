@@ -2,8 +2,10 @@ package cz.mff.mobapp.model;
 
 import android.content.ContentProviderOperation;
 
+import org.json.JSONArray;
 import org.json.JSONObject;
 
+import java.util.ArrayList;
 import java.util.UUID;
 
 import cz.mff.mobapp.api.Response;
@@ -11,6 +13,8 @@ import cz.mff.mobapp.api.Response;
 public final class Contact extends Bundle {
 
     private String label;
+
+    private ArrayList<ContactInfo> contactInfos;
 
     @Override
     public Boolean isContact() {
@@ -26,6 +30,8 @@ public final class Contact extends Bundle {
         return this;
     }
 
+    public static final String INFORMATION = "information";
+
     public static final EntityHandler<Contact> handler = new SimpleEntityHandler<Contact>(Contact.class, Contact::new) {
         @Override
         public void loadFromJSON(Contact c, JSONObject jsonObject) throws Exception {
@@ -33,6 +39,19 @@ public final class Contact extends Bundle {
             c.lastModified = Response.timeFormat.parse(jsonObject.getString(LAST_MODIFIED));
             c.label = jsonObject.getString(LABEL);
             c.isContact = true;
+
+            EntityHandlerRepository<ContactInfo> repo = ContactInfoHandlerRepository.get();
+            c.contactInfos = new ArrayList<>();
+            JSONArray arr = jsonObject.getJSONArray(INFORMATION);
+            for (int i = 0; i < arr.length(); i++) {
+                JSONObject jsonCI = arr.getJSONObject(i);
+                String type = jsonCI.getString(ContactInfo.TYPE);
+                int version = jsonCI.getInt(ContactInfo.VERSION);
+                EntityHandler<ContactInfo> handler = repo.lookup(type, version);
+                ContactInfo contactInfo = handler.create();
+                handler.loadFromJSON(contactInfo, jsonCI.getJSONObject(ContactInfo.DATA));
+                c.contactInfos.add(contactInfo);
+            }
         }
 
         @Override
@@ -57,4 +76,8 @@ public final class Contact extends Bundle {
             to.label = from.getLabel();
         }
     };
+
+    public ArrayList<ContactInfo> getContactInfos() {
+        return contactInfos;
+    }
 }

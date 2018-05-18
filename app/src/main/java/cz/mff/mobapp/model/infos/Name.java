@@ -68,7 +68,7 @@ public class Name implements ContactInfo {
         }
     };
 
-    public static void register(EntityHandlerRepository repo) {
+    public static void register(EntityHandlerRepository<ContactInfo> repo) {
         repo.register(handler);
     }
 
