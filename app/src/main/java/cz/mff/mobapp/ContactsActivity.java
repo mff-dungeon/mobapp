@@ -1,75 +1,65 @@
 package cz.mff.mobapp;
 
-import android.content.Intent;
-import android.os.Bundle;
+import android.Manifest;
 import android.app.Activity;
+import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.database.Cursor;
+import android.os.Bundle;
+import android.provider.ContactsContract;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
+import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
+import android.widget.SimpleCursorAdapter;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import java.util.ArrayList;
-import java.util.UUID;
+import java.util.HashSet;
 
-import cz.mff.mobapp.event.TryCatch;
 import cz.mff.mobapp.gui.ServiceLocator;
-import cz.mff.mobapp.model.Contact;
-import cz.mff.mobapp.model.Manager;
 
-public class ContactsActivity extends Activity implements AuthenticatedActivity {
+public class ContactsActivity extends Activity {
+
+    private ServiceLocator serviceLocator;
+
+    class ContactEntry {
+        final long id;
+        final String name;
+
+        ContactEntry (long id, String name) {
+            this.id = id;
+            this.name = name;
+        }
+    }
+
+    private static final String[] PROJECTION =
+            {
+                    ContactsContract.Contacts._ID,
+                    ContactsContract.Contacts.DISPLAY_NAME_PRIMARY
+            };
+    private static final int PERMISSION_REQUEST_READ_CONTACTS = 7;
+
+    // FIXME: This field is user specific - have globally accessible?
+    public static final String accountName = "???";
+    // FIXME: this field is application specific
+    public static final String MOBAPP_ACCOUNT_TYPE = "com.google";
 
     private ListView contactList;
-    private ServiceLocator serviceLocator;
+    private SimpleCursorAdapter cursorAdapter;
+
+    private HashSet<Long> contactIds;
+    private ArrayList<ContactEntry> entries;
 
     @Override
     protected void onStart() {
         super.onStart();
-
-
-        /*AppDatabase db = Room.databaseBuilder(getApplicationContext(),
-                AppDatabase.class, "test-database2").build();
-
-        DatabaseStorage<Contact, ContactData> storage =
-                new DatabaseStorage<>(db.contactDao(), Executors.newSingleThreadExecutor(),
-                (from, to) -> {
-                    to.setId(from.getId());
-                    to.setLastModified(from.getLastModified());
-                    to.setContact(true);
-                },
-                SerializerFactory.getContactSerializer(), Contact::new);
-
-        final ListView bundleList = findViewById(R.id.bundle_list);
-
-        storage.retrieve(UUID.fromString("74832b01-7643-4d62-965b-b94a8d7cbda9"), new Listener<Contact>() {
-            @Override
-            public void doCatch(Exception data) {
-
-            }
-
-            @Override
-            public void doTry(Contact data) throws Exception {
-                ArrayList<String> listItems = new ArrayList<>();
-                if (data == null || data.getId() == null) {
-                    listItems.add("NULL");
-                }
-                else {
-                    listItems.add(data.getId() + " --- " + data.getLastModified().toString());
-                }
-
-                final ArrayAdapter<String> adapter = new ArrayAdapter<>(ContactsActivity.this,
-                        android.R.layout.simple_list_item_1, listItems);
-
-                runOnUiThread(() -> bundleList.setAdapter(adapter));
-            }
-        });
-        */
-
-        ServiceLocator.create(this);
     }
 
     @Override
@@ -78,56 +68,91 @@ public class ContactsActivity extends Activity implements AuthenticatedActivity 
         setContentView(R.layout.activity_contacts);
 
         contactList = findViewById(R.id.contact_list);
-        contactList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+        contactList.setOnItemClickListener((adapterView, view, position, row) -> {
+            long contactId = entries.get(position).id;
+            showContactDetail(contactId);
+        });
+
+        cursorAdapter = new SimpleCursorAdapter(
+                this, android.R.layout.simple_list_item_1,
+                null, new String[]{ContactsContract.Contacts.DISPLAY_NAME_PRIMARY},
+                new int[] {android.R.id.text1}, 0);
+        contactList.setAdapter(cursorAdapter);
+
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_CONTACTS)
+                != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this,
+                    new String[]{Manifest.permission.READ_CONTACTS},
+                    PERMISSION_REQUEST_READ_CONTACTS);
+        }
+        else {
+            loadContacts();
+        }
+    }
+
+    public void loadContacts() {
+        final Cursor rawContacts = getContentResolver().query(ContactsContract.RawContacts.CONTENT_URI.buildUpon()
+                        .appendQueryParameter(ContactsContract.RawContacts.ACCOUNT_TYPE, MOBAPP_ACCOUNT_TYPE)
+                        .appendQueryParameter(ContactsContract.RawContacts.ACCOUNT_NAME, accountName)
+                        .build(),
+                new String[] {ContactsContract.RawContacts.CONTACT_ID},
+                null, null, null);
+
+        contactIds = new HashSet<>();
+        entries = new ArrayList<>();
+        while (rawContacts.moveToNext()) {
+            contactIds.add(rawContacts.getLong(0));
+        }
+
+        final Cursor contacts = getContentResolver().query(ContactsContract.Contacts.CONTENT_URI,
+                PROJECTION, null, null,
+                ContactsContract.Contacts.DISPLAY_NAME_PRIMARY + " ASC");
+
+        while (contacts.moveToNext()) {
+            long id = contacts.getLong(0);
+            if (!contactIds.contains(id)) {
+                Log.w("f", "Filtering contact " + contacts.getString(1));
+                continue;
+            }
+            ContactEntry entry = new ContactEntry(id, contacts.getString(1));
+            entries.add(entry);
+        }
+
+        contactList.setAdapter(new ArrayAdapter<ContactEntry>(this,
+                android.R.layout.simple_list_item_1, entries) {
+            @NonNull
             @Override
-            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                Contact contact = (Contact) adapterView.getItemAtPosition(i);
-                UUID id = contact.getId();
-                showContactDetail(id);
+            public View getView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {
+                if (convertView == null) {
+                    convertView = LayoutInflater.from(ContactsActivity.this)
+                            .inflate(R.layout.contact_list_item, parent, false);
+                }
+                ((TextView) convertView.findViewById(R.id.contact_list_text))
+                        .setText(entries.get(position).name);
+                return convertView;
             }
         });
     }
 
-    private void showContactDetail(UUID id) {
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        switch (requestCode) {
+            case PERMISSION_REQUEST_READ_CONTACTS:
+                if (grantResults.length > 0
+                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    loadContacts();
+                }
+                else {
+                    TextView view = new TextView(this);
+                    view.setText("Cannot display your contacts as you didn't give us the permission");
+                    contactList.setEmptyView(view);
+                }
+        }
+    }
+
+    private void showContactDetail(long contactId) {
         Intent intent = new Intent(this, ContactDetailActivity.class);
-        intent.putExtra("uuid", id);
+        intent.putExtra("id", contactId);
         startActivity(intent);
-    }
-
-    private void loadContactData(Manager<Contact, UUID> manager) {
-        manager.listAll(new TryCatch<>(this::showContactData, e -> Toast.makeText(this, e.getMessage(), Toast.LENGTH_LONG).show()));
-    }
-
-    // Should be run on UI Thread
-    private void showContactData(ArrayList<Contact> contacts) {
-        ArrayAdapter<Contact> adapter = new ArrayAdapter<Contact>(this,
-                android.R.layout.simple_list_item_1, contacts) {
-            @NonNull
-            @Override
-            public View getView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {
-                TextView view = (TextView) super.getView(position, convertView, parent);
-                String label = getItem(position).getLabel();
-                view.setText(label != null ? label : "No label, WTF?");
-                return view;
-            }
-        };
-
-        contactList.setAdapter(adapter);
-    }
-
-    @Override
-    public Activity getActivity() {
-        return this;
-    }
-
-    @Override
-    public void onAuthenticated() {
-        Manager<Contact, UUID> manager = serviceLocator.createContactManager();
-        loadContactData(manager);
-    }
-
-    @Override
-    public void setServiceLocator(ServiceLocator serviceLocator) {
-        this.serviceLocator = serviceLocator;
     }
 }
