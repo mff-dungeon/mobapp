@@ -23,7 +23,7 @@ import cz.mff.mobapp.auth.AccountUtils;
 import cz.mff.mobapp.auth.AuthPreferences;
 import cz.mff.mobapp.event.ExceptionListener;
 import cz.mff.mobapp.event.TryCatch;
-import cz.mff.mobapp.gui.ServiceFactory;
+import cz.mff.mobapp.gui.ServiceLocator;
 import cz.mff.mobapp.model.Contact;
 import cz.mff.mobapp.model.Manager;
 
@@ -66,7 +66,7 @@ public class MainActivity extends Activity implements ExceptionListener {
         requester = new Requester("test", "test");
         requester.initializeQueue(this);
 
-        ServiceFactory sf = new ServiceFactory(this);
+        ServiceLocator sf = new ServiceLocator(this);
         manager = sf.createContactManager();
 
         setContentView(R.layout.activity_main);

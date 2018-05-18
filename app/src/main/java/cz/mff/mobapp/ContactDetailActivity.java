@@ -5,12 +5,10 @@ import android.os.Bundle;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import java.util.Date;
 import java.util.UUID;
 
-import cz.mff.mobapp.api.Requester;
 import cz.mff.mobapp.event.TryCatch;
-import cz.mff.mobapp.gui.ServiceFactory;
+import cz.mff.mobapp.gui.ServiceLocator;
 import cz.mff.mobapp.model.Contact;
 import cz.mff.mobapp.model.Manager;
 
@@ -24,7 +22,7 @@ public class ContactDetailActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_contact_detail);
 
-        ServiceFactory sf = new ServiceFactory(this);
+        ServiceLocator sf = new ServiceLocator(this);
         manager = sf.createContactManager();
 
         loadContact((UUID) getIntent().getSerializableExtra("uuid"));

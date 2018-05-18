@@ -34,10 +34,9 @@ public class ContactSync {
         mLocalManager.listByIDs(uuids, new TryCatch<>(
                 contacts -> {
                     synchronizeWithContacts(contacts, remoteContacts, remoteUUIDs);
+                    listener.doTry(null);
                 },
-                exception -> {
-                    listener.doCatch(exception);
-                }
+                listener
         ));
     }
 

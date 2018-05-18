@@ -16,14 +16,10 @@ import android.widget.Toast;
 import java.util.ArrayList;
 import java.util.UUID;
 
-import cz.mff.mobapp.api.APIStorage;
-import cz.mff.mobapp.api.Requester;
-import cz.mff.mobapp.api.SerializerFactory;
 import cz.mff.mobapp.event.TryCatch;
-import cz.mff.mobapp.gui.ServiceFactory;
+import cz.mff.mobapp.gui.ServiceLocator;
 import cz.mff.mobapp.model.Contact;
 import cz.mff.mobapp.model.Manager;
-import cz.mff.mobapp.model.Storage;
 
 public class ContactsActivity extends Activity {
 
@@ -71,7 +67,7 @@ public class ContactsActivity extends Activity {
         });
         */
 
-        ServiceFactory sf = new ServiceFactory(this);
+        ServiceLocator sf = new ServiceLocator(this);
         Manager<Contact, UUID> manager = sf.createContactManager();
 
         loadContactData(manager);
