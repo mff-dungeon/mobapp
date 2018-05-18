@@ -7,7 +7,6 @@ import android.net.Uri;
 import android.nfc.NdefMessage;
 import android.nfc.NdefRecord;
 import android.nfc.NfcAdapter;
-import android.nfc.NfcEvent;
 import android.os.Parcelable;
 import android.util.Log;
 import android.widget.TextView;
@@ -77,13 +76,7 @@ public class MainActivity extends Activity implements ExceptionListener, Authent
             askUserForTicketId();
         }
 
-        NfcAdapter nfc = NfcAdapter.getDefaultAdapter(this);
-        if (nfc != null) {
-            nfc.setNdefPushMessageCallback(event -> {
-                NdefRecord uriRecord = NdefRecord.createUri(Uri.encode("http://www.google.com/"));
-                return new NdefMessage(new NdefRecord[]{uriRecord});
-            }, this, this);
-        }
+        NdefUtils.shareUrl(this, Uri.encode("http://www.google.com/"));
     }
 
     @Override

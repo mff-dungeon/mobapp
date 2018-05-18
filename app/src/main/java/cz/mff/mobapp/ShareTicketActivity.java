@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Color;
+import android.net.Uri;
 import android.os.Bundle;
 import android.widget.ImageView;
 
@@ -31,6 +32,8 @@ public class ShareTicketActivity extends Activity {
         } catch (WriterException e) {
             e.printStackTrace();
         }
+
+        NdefUtils.shareUrl(this, Uri.encode(String.format(QR_TEXT_FORMAT, ticketId)));
     }
 
     private void generateQrCode() throws WriterException {
