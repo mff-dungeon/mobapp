@@ -22,7 +22,6 @@ public class ServiceLocator {
 
     private Activity activity;
     private AccountSession accountSession;
-    private static final String DB_NAME = "test-database2";
 
     protected ServiceLocator(Activity activity) {
         this.activity = activity;

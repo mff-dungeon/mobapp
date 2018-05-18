@@ -16,8 +16,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.ListAdapter;
 import android.widget.ListView;
-import android.widget.SimpleCursorAdapter;
 import android.widget.TextView;
 
 import java.util.ArrayList;
@@ -25,7 +25,7 @@ import java.util.HashSet;
 
 import cz.mff.mobapp.gui.ServiceLocator;
 
-public class ContactsActivity extends Activity {
+public class ContactsActivity extends Activity implements AuthenticatedActivity {
 
     private ServiceLocator serviceLocator;
 
@@ -39,20 +39,22 @@ public class ContactsActivity extends Activity {
         }
     }
 
+    private static final int PERMISSION_REQUEST_READ_CONTACTS = 7;
+    // FIXME: this field is application specific
+    private static final String MOBAPP_ACCOUNT_TYPE = "com.google";
+
     private static final String[] PROJECTION =
             {
                     ContactsContract.Contacts._ID,
                     ContactsContract.Contacts.DISPLAY_NAME_PRIMARY
             };
-    private static final int PERMISSION_REQUEST_READ_CONTACTS = 7;
 
-    // FIXME: This field is user specific - have globally accessible?
-    public static final String accountName = "???";
-    // FIXME: this field is application specific
-    public static final String MOBAPP_ACCOUNT_TYPE = "com.google";
+    public String accountName;
+
+    private boolean authenticated = false;
 
     private ListView contactList;
-    private SimpleCursorAdapter cursorAdapter;
+    private ListAdapter adapter;
 
     private HashSet<Long> contactIds;
     private ArrayList<ContactEntry> entries;
@@ -73,24 +75,10 @@ public class ContactsActivity extends Activity {
             showContactDetail(contactId);
         });
 
-        cursorAdapter = new SimpleCursorAdapter(
-                this, android.R.layout.simple_list_item_1,
-                null, new String[]{ContactsContract.Contacts.DISPLAY_NAME_PRIMARY},
-                new int[] {android.R.id.text1}, 0);
-        contactList.setAdapter(cursorAdapter);
-
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_CONTACTS)
-                != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(this,
-                    new String[]{Manifest.permission.READ_CONTACTS},
-                    PERMISSION_REQUEST_READ_CONTACTS);
-        }
-        else {
-            loadContacts();
-        }
+        contactList.setEmptyView(findViewById(R.id.contact_list_empty));
     }
 
-    public void loadContacts() {
+    private void loadContacts() {
         final Cursor rawContacts = getContentResolver().query(ContactsContract.RawContacts.CONTENT_URI.buildUpon()
                         .appendQueryParameter(ContactsContract.RawContacts.ACCOUNT_TYPE, MOBAPP_ACCOUNT_TYPE)
                         .appendQueryParameter(ContactsContract.RawContacts.ACCOUNT_NAME, accountName)
@@ -118,7 +106,12 @@ public class ContactsActivity extends Activity {
             entries.add(entry);
         }
 
-        contactList.setAdapter(new ArrayAdapter<ContactEntry>(this,
+        if (entries.size() == 0) {
+            contactList.setEmptyView(findViewById(R.id.contact_list_empty));
+            return;
+        }
+
+        adapter = new ArrayAdapter<ContactEntry>(this,
                 android.R.layout.simple_list_item_1, entries) {
             @NonNull
             @Override
@@ -131,7 +124,9 @@ public class ContactsActivity extends Activity {
                         .setText(entries.get(position).name);
                 return convertView;
             }
-        });
+        };
+
+        contactList.setAdapter(adapter);
     }
 
     @Override
@@ -140,12 +135,10 @@ public class ContactsActivity extends Activity {
             case PERMISSION_REQUEST_READ_CONTACTS:
                 if (grantResults.length > 0
                         && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    loadContacts();
+                    if (authenticated) loadContacts();
                 }
                 else {
-                    TextView view = new TextView(this);
-                    view.setText("Cannot display your contacts as you didn't give us the permission");
-                    contactList.setEmptyView(view);
+                    contactList.setEmptyView(findViewById(R.id.contact_list_not_accessible));
                 }
         }
     }
@@ -154,5 +147,30 @@ public class ContactsActivity extends Activity {
         Intent intent = new Intent(this, ContactDetailActivity.class);
         intent.putExtra("id", contactId);
         startActivity(intent);
+    }
+
+    @Override
+    public void setServiceLocator(ServiceLocator serviceLocator) {
+        this.serviceLocator = serviceLocator;
+    }
+
+    @Override
+    public void onAuthenticated() {
+        authenticated = true;
+        // FIXME: accountName = serviceLocator.getAccountName();
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_CONTACTS)
+                != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this,
+                    new String[]{Manifest.permission.READ_CONTACTS},
+                    PERMISSION_REQUEST_READ_CONTACTS);
+        }
+        else {
+            loadContacts();
+        }
+    }
+
+    @Override
+    public Activity getActivity() {
+        return this;
     }
 }
