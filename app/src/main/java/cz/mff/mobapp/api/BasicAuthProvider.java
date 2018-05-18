@@ -14,10 +14,11 @@ public class BasicAuthProvider implements RequestAuthProvider {
         this.userPass = encodeUserPass(username, password);
     }
 
-    private String encodeUserPass(String username, String password) {
+    private static String encodeUserPass(String username, String password) {
+        String rawUserPass = String.format("%s:%s", username, password);
+
         try {
-            return Base64.encodeToString((username + ":" + password).getBytes("UTF-8"),
-                    Base64.DEFAULT);
+            return Base64.encodeToString(rawUserPass.getBytes("UTF-8"), Base64.DEFAULT);
         }
         catch (UnsupportedEncodingException ignored) {
             // Doesn't happen for UTF-8
