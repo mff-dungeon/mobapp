@@ -19,7 +19,7 @@ public class Note implements ContactInfo {
     public static final EntityHandler<Note> handler = new SimpleEntityHandler<Note>(Note.class, Note::new) {
         @Override
         public void loadFromJSON(Note object, JSONObject jsonObject) throws Exception {
-            object.content = jsonObject.getString(NOTE_CONTENT_KEY);
+            object.content = jsonObject.optString(NOTE_CONTENT_KEY);
         }
 
         @Override
@@ -29,7 +29,8 @@ public class Note implements ContactInfo {
 
         @Override
         public ContentProviderOperation.Builder storeToBuilder(Note object, ContentProviderOperation.Builder builder) throws Exception {
-            return builder.withValue(ContactsContract.CommonDataKinds.Note.NOTE, object.content);
+            return builder.withValue(ContactsContract.CommonDataKinds.Note.NOTE, object.content)
+                    .withValue(ContactsContract.CommonDataKinds.Note.MIMETYPE, ContactsContract.CommonDataKinds.Note.CONTENT_ITEM_TYPE);
         }
 
         @Override

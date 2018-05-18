@@ -1,6 +1,7 @@
 package cz.mff.mobapp.model;
 
 import android.content.ContentProviderOperation;
+import android.provider.ContactsContract;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -9,6 +10,7 @@ import java.util.ArrayList;
 import java.util.UUID;
 
 import cz.mff.mobapp.api.Response;
+import cz.mff.mobapp.sync.Contracts;
 
 public final class Contact extends Bundle {
 
@@ -66,8 +68,9 @@ public final class Contact extends Bundle {
         }
 
         @Override
-        public ContentProviderOperation.Builder storeToBuilder(Contact object, ContentProviderOperation.Builder builder) throws Exception {
-            throw new UnsupportedOperationException();
+        public ContentProviderOperation.Builder storeToBuilder(Contact c, ContentProviderOperation.Builder builder) throws Exception {
+            return builder.withValue(ContactsContract.RawContacts.SOURCE_ID, c.getId().toString())
+                    .withValue(Contracts.LAST_MODIFIED, c.getLastModified().toString());
         }
 
         @Override

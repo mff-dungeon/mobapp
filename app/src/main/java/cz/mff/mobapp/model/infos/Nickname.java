@@ -19,7 +19,7 @@ public class Nickname implements ContactInfo {
     public static final EntityHandler<Nickname> handler = new SimpleEntityHandler<Nickname>(Nickname.class, Nickname::new) {
         @Override
         public void loadFromJSON(Nickname object, JSONObject jsonObject) throws Exception {
-            object.nickname = jsonObject.getString(NICKNAME_KEY);
+            object.nickname = jsonObject.optString(NICKNAME_KEY);
         }
 
         @Override
@@ -29,7 +29,8 @@ public class Nickname implements ContactInfo {
 
         @Override
         public ContentProviderOperation.Builder storeToBuilder(Nickname object, ContentProviderOperation.Builder builder) throws Exception {
-            return builder.withValue(ContactsContract.CommonDataKinds.Nickname.NAME, object.nickname);
+            return builder.withValue(ContactsContract.CommonDataKinds.Nickname.NAME, object.nickname)
+                    .withValue(ContactsContract.CommonDataKinds.Nickname.MIMETYPE, ContactsContract.CommonDataKinds.Nickname.CONTENT_ITEM_TYPE);
         }
 
         @Override

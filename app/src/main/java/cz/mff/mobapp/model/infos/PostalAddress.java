@@ -31,13 +31,13 @@ public class PostalAddress implements ContactInfo {
     public static final EntityHandler<PostalAddress> handler = new SimpleEntityHandler<PostalAddress>(PostalAddress.class, PostalAddress::new) {
         @Override
         public void loadFromJSON(PostalAddress object, JSONObject jsonObject) throws Exception {
-            object.formattedAddress = jsonObject.getString(ADDRESS_FORMATTED_KEY);
-            object.addressType = jsonObject.getString(ADDRESS_TYPE_KEY);
-            object.street = jsonObject.getString(ADDRESS_STREET_KEY);
-            object.city = jsonObject.getString(ADDRESS_CITY_KEY);
-            object.region = jsonObject.getString(ADDRESS_REGION_KEY);
-            object.postcode = jsonObject.getString(ADDRESS_POSTCODE_KEY);
-            object.country = jsonObject.getString(ADDRESS_COUNTRY_KEY);
+            object.formattedAddress = jsonObject.optString(ADDRESS_FORMATTED_KEY);
+            object.addressType = jsonObject.optString(ADDRESS_TYPE_KEY);
+            object.street = jsonObject.optString(ADDRESS_STREET_KEY);
+            object.city = jsonObject.optString(ADDRESS_CITY_KEY);
+            object.region = jsonObject.optString(ADDRESS_REGION_KEY);
+            object.postcode = jsonObject.optString(ADDRESS_POSTCODE_KEY);
+            object.country = jsonObject.optString(ADDRESS_COUNTRY_KEY);
         }
 
         @Override
@@ -60,7 +60,8 @@ public class PostalAddress implements ContactInfo {
                     .withValue(CommonDataKinds.StructuredPostal.CITY, object.city)
                     .withValue(CommonDataKinds.StructuredPostal.REGION, object.region)
                     .withValue(CommonDataKinds.StructuredPostal.POSTCODE, object.postcode)
-                    .withValue(CommonDataKinds.StructuredPostal.COUNTRY, object.country);
+                    .withValue(CommonDataKinds.StructuredPostal.COUNTRY, object.country)
+                    .withValue(CommonDataKinds.StructuredPostal.MIMETYPE, CommonDataKinds.StructuredPostal.CONTENT_TYPE);
         }
 
         @Override

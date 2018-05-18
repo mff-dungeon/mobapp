@@ -19,7 +19,7 @@ public class Website implements ContactInfo {
     public static final EntityHandler<Website> handler = new SimpleEntityHandler<Website>(Website.class, Website::new) {
         @Override
         public void loadFromJSON(Website object, JSONObject jsonObject) throws Exception {
-            object.url = jsonObject.getString(WEBSITE_URL_KEY);
+            object.url = jsonObject.optString(WEBSITE_URL_KEY);
         }
 
         @Override
@@ -30,7 +30,8 @@ public class Website implements ContactInfo {
         @Override
         public Builder storeToBuilder(Website object, Builder builder) throws Exception {
             return builder
-                    .withValue(CommonDataKinds.Website.URL, object.url);
+                    .withValue(CommonDataKinds.Website.URL, object.url)
+                    .withValue(CommonDataKinds.Website.MIMETYPE, CommonDataKinds.Website.CONTENT_ITEM_TYPE);
         }
 
         @Override

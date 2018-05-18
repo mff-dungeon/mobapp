@@ -22,8 +22,8 @@ public class Photo implements ContactInfo {
     public static final EntityHandler<Photo> handler = new SimpleEntityHandler<Photo>(Photo.class, Photo::new) {
         @Override
         public void loadFromJSON(Photo object, JSONObject jsonObject) throws Exception {
-            object.fileId = jsonObject.getString(PHOTO_FILE_ID_KEY);
-            object.file = jsonObject.getString(PHOTO_FILE_KEY);
+            object.fileId = jsonObject.optString(PHOTO_FILE_ID_KEY);
+            object.file = jsonObject.optString(PHOTO_FILE_KEY);
         }
 
         @Override
@@ -36,7 +36,8 @@ public class Photo implements ContactInfo {
         public Builder storeToBuilder(Photo object, Builder builder) throws Exception {
             return builder
                     .withValue(CommonDataKinds.Photo.PHOTO_FILE_ID, object.fileId)
-                    .withValue(CommonDataKinds.Photo.PHOTO, object.file);
+                    .withValue(CommonDataKinds.Photo.PHOTO, object.file)
+                    .withValue(CommonDataKinds.Photo.MIMETYPE, CommonDataKinds.Photo.CONTENT_ITEM_TYPE);
         }
 
         @Override

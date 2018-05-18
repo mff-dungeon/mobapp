@@ -31,12 +31,12 @@ public class Organization implements ContactInfo {
     public static final EntityHandler<Organization> handler = new SimpleEntityHandler<Organization>(Organization.class, Organization::new) {
         @Override
         public void loadFromJSON(Organization object, JSONObject jsonObject) throws Exception {
-            object.company = jsonObject.getString(ORG_COMPANY_KEY);
-            object.title = jsonObject.getString(ORG_TITLE_KEY);
-            object.department = jsonObject.getString(ORG_DEPARTMENT_KEY);
-            object.job = jsonObject.getString(ORG_JOB_KEY);
-            object.symbol = jsonObject.getString(ORG_SYMBOL_KEY);
-            object.office = jsonObject.getString(ORG_OFFICE_KEY);
+            object.company = jsonObject.optString(ORG_COMPANY_KEY);
+            object.title = jsonObject.optString(ORG_TITLE_KEY);
+            object.department = jsonObject.optString(ORG_DEPARTMENT_KEY);
+            object.job = jsonObject.optString(ORG_JOB_KEY);
+            object.symbol = jsonObject.optString(ORG_SYMBOL_KEY);
+            object.office = jsonObject.optString(ORG_OFFICE_KEY);
         }
 
         @Override
@@ -57,7 +57,8 @@ public class Organization implements ContactInfo {
                     .withValue(CommonDataKinds.Organization.DEPARTMENT, object.department)
                     .withValue(CommonDataKinds.Organization.JOB_DESCRIPTION, object.job)
                     .withValue(CommonDataKinds.Organization.SYMBOL, object.symbol)
-                    .withValue(CommonDataKinds.Organization.OFFICE_LOCATION, object.office);
+                    .withValue(CommonDataKinds.Organization.OFFICE_LOCATION, object.office)
+                    .withValue(CommonDataKinds.Organization.MIMETYPE, CommonDataKinds.Organization.CONTENT_ITEM_TYPE);
         }
 
         @Override

@@ -22,8 +22,8 @@ public class InstantMessenger implements ContactInfo {
     public static final EntityHandler<InstantMessenger> handler = new SimpleEntityHandler<InstantMessenger>(InstantMessenger.class, InstantMessenger::new) {
         @Override
         public void loadFromJSON(InstantMessenger object, JSONObject jsonObject) throws Exception {
-            object.id = jsonObject.getString(IM_ID_KEY);
-            object.protocol = jsonObject.getInt(IM_PROTOCOL_KEY);
+            object.id = jsonObject.optString(IM_ID_KEY);
+            object.protocol = jsonObject.optInt(IM_PROTOCOL_KEY);
         }
 
         @Override
@@ -35,7 +35,8 @@ public class InstantMessenger implements ContactInfo {
         @Override
         public ContentProviderOperation.Builder storeToBuilder(InstantMessenger object, ContentProviderOperation.Builder builder) throws Exception {
             return builder.withValue(ContactsContract.CommonDataKinds.Im.DATA, object.id)
-                    .withValue(ContactsContract.CommonDataKinds.Im.PROTOCOL, object.protocol);
+                    .withValue(ContactsContract.CommonDataKinds.Im.PROTOCOL, object.protocol)
+                    .withValue(ContactsContract.CommonDataKinds.Im.MIMETYPE, ContactsContract.CommonDataKinds.Im.CONTENT_ITEM_TYPE);
         }
 
         @Override

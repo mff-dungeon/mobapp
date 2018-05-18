@@ -21,8 +21,8 @@ public class Phone implements ContactInfo {
     public static final EntityHandler<Phone> handler = new SimpleEntityHandler<Phone>(Phone.class, Phone::new) {
         @Override
         public void loadFromJSON(Phone object, JSONObject jsonObject) throws Exception {
-            object.number = jsonObject.getString(PHONE_NUMBER_KEY);
-            object.type = jsonObject.getInt(PHONE_TYPE_KEY);
+            object.number = jsonObject.optString(PHONE_NUMBER_KEY);
+            object.type = jsonObject.optInt(PHONE_TYPE_KEY);
         }
 
         @Override
@@ -35,7 +35,8 @@ public class Phone implements ContactInfo {
         public Builder storeToBuilder(Phone object, Builder builder) throws Exception {
                 return builder
                         .withValue(CommonDataKinds.Phone.NUMBER, object.number)
-                        .withValue(CommonDataKinds.Phone.TYPE, object.type);
+                        .withValue(CommonDataKinds.Phone.TYPE, object.type)
+                        .withValue(CommonDataKinds.Phone.MIMETYPE, CommonDataKinds.Phone.CONTENT_ITEM_TYPE);
         }
 
         @Override

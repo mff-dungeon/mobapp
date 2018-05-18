@@ -21,8 +21,8 @@ public class Identity implements ContactInfo {
     public static final EntityHandler<Identity> handler = new SimpleEntityHandler<Identity>(Identity.class, Identity::new) {
         @Override
         public void loadFromJSON(Identity object, JSONObject jsonObject) throws Exception {
-            object.number = jsonObject.getString(IDENTITY_NUMBER_KEY);
-            object.namespace = jsonObject.getString(IDENTITY_NAMESPACE_KEY);
+            object.number = jsonObject.optString(IDENTITY_NUMBER_KEY);
+            object.namespace = jsonObject.optString(IDENTITY_NAMESPACE_KEY);
         }
 
         @Override
@@ -34,7 +34,8 @@ public class Identity implements ContactInfo {
         @Override
         public ContentProviderOperation.Builder storeToBuilder(Identity object, ContentProviderOperation.Builder builder) throws Exception {
             return builder.withValue(ContactsContract.CommonDataKinds.Identity.IDENTITY, object.number)
-                    .withValue(ContactsContract.CommonDataKinds.Identity.NAMESPACE, object.namespace);
+                    .withValue(ContactsContract.CommonDataKinds.Identity.NAMESPACE, object.namespace)
+                    .withValue(ContactsContract.CommonDataKinds.Identity.MIMETYPE, ContactsContract.CommonDataKinds.Identity.CONTENT_ITEM_TYPE);
         }
 
         @Override

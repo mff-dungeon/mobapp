@@ -29,12 +29,12 @@ public class Name implements ContactInfo {
     public static final EntityHandler<Name> handler = new SimpleEntityHandler<Name>(Name.class, Name::new) {
         @Override
         public void loadFromJSON(Name object, JSONObject jsonObject) throws Exception {
-            object.displayName = jsonObject.getString(NAME_DISPLAY_KEY);
-            object.givenName = jsonObject.getString(NAME_GIVEN_KEY);
-            object.familyName = jsonObject.getString(NAME_FAMILY_KEY);
-            object.prefix = jsonObject.getString(NAME_PREFIX_KEY);
-            object.middleName = jsonObject.getString(NAME_MIDDLE_KEY);
-            object.suffix = jsonObject.getString(NAME_SUFFIX_KEY);
+            object.displayName = jsonObject.optString(NAME_DISPLAY_KEY);
+            object.givenName = jsonObject.optString(NAME_GIVEN_KEY);
+            object.familyName = jsonObject.optString(NAME_FAMILY_KEY);
+            object.prefix = jsonObject.optString(NAME_PREFIX_KEY);
+            object.middleName = jsonObject.optString(NAME_MIDDLE_KEY);
+            object.suffix = jsonObject.optString(NAME_SUFFIX_KEY);
         }
 
         @Override
@@ -54,7 +54,8 @@ public class Name implements ContactInfo {
                     .withValue(StructuredName.FAMILY_NAME, object.familyName)
                     .withValue(StructuredName.PREFIX, object.prefix)
                     .withValue(StructuredName.MIDDLE_NAME, object.middleName)
-                    .withValue(StructuredName.SUFFIX, object.suffix);
+                    .withValue(StructuredName.SUFFIX, object.suffix)
+                    .withValue(StructuredName.MIMETYPE, StructuredName.CONTENT_ITEM_TYPE);
         }
 
         @Override

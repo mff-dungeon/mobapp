@@ -21,8 +21,8 @@ public class Address implements ContactInfo {
     public static final EntityHandler<Address> handler = new SimpleEntityHandler<Address>(Address.class, Address::new) {
         @Override
         public void loadFromJSON(Address object, JSONObject jsonObject) throws Exception {
-            object.address = jsonObject.getString(ADDRESS_CONTENT_KEY);
-            object.type = jsonObject.getInt(ADDRESS_TYPE_KEY);
+            object.address = jsonObject.optString(ADDRESS_CONTENT_KEY);
+            object.type = jsonObject.optInt(ADDRESS_TYPE_KEY);
         }
 
         @Override
@@ -32,9 +32,10 @@ public class Address implements ContactInfo {
         }
 
         @Override
-        public Builder storeToBuilder(Address object, Builder builder) throws Exception {
+        public Builder storeToBuilder(Address object, Builder builder) {
             return builder.withValue(StructuredPostal.FORMATTED_ADDRESS, object.address)
-                    .withValue(StructuredPostal.TYPE, object.type);
+                    .withValue(StructuredPostal.TYPE, object.type)
+                    .withValue(StructuredPostal.MIMETYPE, StructuredPostal.CONTENT_ITEM_TYPE);
         }
 
         @Override

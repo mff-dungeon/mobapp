@@ -1,6 +1,5 @@
 package cz.mff.mobapp.model.infos;
 
-import android.content.ContentProviderOperation;
 import android.content.ContentProviderOperation.Builder;
 import android.provider.ContactsContract.CommonDataKinds;
 
@@ -24,9 +23,9 @@ public class Email implements ContactInfo {
     public static final EntityHandler<Email> handler = new SimpleEntityHandler<Email>(Email.class, Email::new) {
         @Override
         public void loadFromJSON(Email object, JSONObject jsonObject) throws Exception {
-            object.address = jsonObject.getString(EMAIL_ADDRESS_KEY);
-            object.type = jsonObject.getInt(EMAIL_TYPE_KEY);
-            object.displayName = jsonObject.getString(EMAIL_DISPLAY_NAME_KEY);
+            object.address = jsonObject.optString(EMAIL_ADDRESS_KEY);
+            object.type = jsonObject.optInt(EMAIL_TYPE_KEY);
+            object.displayName = jsonObject.optString(EMAIL_DISPLAY_NAME_KEY);
         }
 
         @Override
@@ -37,14 +36,15 @@ public class Email implements ContactInfo {
         }
 
         @Override
-        public Builder storeToBuilder(Email object, Builder builder) throws Exception {
+        public Builder storeToBuilder(Email object, Builder builder) {
             return builder.withValue(CommonDataKinds.Email.ADDRESS, object.address)
                     .withValue(CommonDataKinds.Email.TYPE, object.type)
-                    .withValue(CommonDataKinds.Email.DISPLAY_NAME, object.displayName);
+                    .withValue(CommonDataKinds.Email.DISPLAY_NAME, object.displayName)
+                    .withValue(CommonDataKinds.Email.MIMETYPE, CommonDataKinds.Email.CONTENT_ITEM_TYPE);
         }
 
         @Override
-        public void update(Email from, Email to) throws Exception {
+        public void update(Email from, Email to) {
             to.address = from.address;
             to.type = from.type;
             to.displayName = from.displayName;

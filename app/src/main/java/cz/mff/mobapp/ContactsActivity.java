@@ -158,15 +158,9 @@ public class ContactsActivity extends Activity implements AuthenticatedActivity 
     public void onAuthenticated() {
         authenticated = true;
 
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_CONTACTS)
-                != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(this,
-                    new String[]{Manifest.permission.READ_CONTACTS},
-                    PERMISSION_REQUEST_READ_CONTACTS);
-        }
-        else {
-            loadContacts();
-        }
+        ActivityCompat.requestPermissions(this,
+                new String[]{Manifest.permission.READ_CONTACTS, Manifest.permission.WRITE_CONTACTS},
+                PERMISSION_REQUEST_READ_CONTACTS);
     }
 
     @Override

@@ -1,7 +1,5 @@
 package cz.mff.mobapp.model;
 
-import android.content.ContentProviderOperation.Builder;
-
 abstract public class SimpleEntityHandler<T> implements EntityHandler<T> {
 
     private final Class<T> cls;
