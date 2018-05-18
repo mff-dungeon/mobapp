@@ -1,5 +1,8 @@
 package cz.mff.mobapp.model.infos;
 
+import android.content.ContentProviderOperation.Builder;
+import android.provider.ContactsContract.CommonDataKinds;
+
 import org.json.JSONObject;
 
 import cz.mff.mobapp.model.ContactInfo;
@@ -46,6 +49,18 @@ public class PostalAddress implements ContactInfo {
             jsonObject.put(ADDRESS_REGION_KEY, object.region);
             jsonObject.put(ADDRESS_POSTCODE_KEY, object.postcode);
             jsonObject.put(ADDRESS_COUNTRY_KEY, object.country);
+        }
+
+        @Override
+        public Builder storeToBuilder(PostalAddress object, Builder builder) throws Exception {
+            return builder
+                    .withValue(CommonDataKinds.StructuredPostal.FORMATTED_ADDRESS, object.formattedAddress)
+                    .withValue(CommonDataKinds.StructuredPostal.TYPE, object.addressType)
+                    .withValue(CommonDataKinds.StructuredPostal.STREET, object.street)
+                    .withValue(CommonDataKinds.StructuredPostal.CITY, object.city)
+                    .withValue(CommonDataKinds.StructuredPostal.REGION, object.region)
+                    .withValue(CommonDataKinds.StructuredPostal.POSTCODE, object.postcode)
+                    .withValue(CommonDataKinds.StructuredPostal.COUNTRY, object.country);
         }
 
         @Override

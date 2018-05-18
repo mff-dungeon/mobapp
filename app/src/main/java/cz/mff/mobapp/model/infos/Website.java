@@ -1,5 +1,8 @@
 package cz.mff.mobapp.model.infos;
 
+import android.content.ContentProviderOperation.Builder;
+import android.provider.ContactsContract.CommonDataKinds;
+
 import org.json.JSONObject;
 
 import cz.mff.mobapp.model.ContactInfo;
@@ -22,6 +25,12 @@ public class Website implements ContactInfo {
         @Override
         public void storeToJSON(Website object, JSONObject jsonObject) throws Exception {
             jsonObject.put(WEBSITE_URL_KEY, object.url);
+        }
+
+        @Override
+        public Builder storeToBuilder(Website object, Builder builder) throws Exception {
+            return builder
+                    .withValue(CommonDataKinds.Website.URL, object.url);
         }
 
         @Override

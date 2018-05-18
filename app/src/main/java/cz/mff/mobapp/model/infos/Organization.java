@@ -1,5 +1,10 @@
 package cz.mff.mobapp.model.infos;
 
+import android.content.ContentProviderOperation;
+import android.content.ContentProviderOperation.Builder;
+import android.provider.ContactsContract;
+import android.provider.ContactsContract.CommonDataKinds;
+
 import org.json.JSONObject;
 
 import cz.mff.mobapp.model.ContactInfo;
@@ -42,6 +47,17 @@ public class Organization implements ContactInfo {
             jsonObject.put(ORG_JOB_KEY, object.job);
             jsonObject.put(ORG_SYMBOL_KEY, object.symbol);
             jsonObject.put(ORG_OFFICE_KEY, object.office);
+        }
+
+        @Override
+        public Builder storeToBuilder(Organization object, Builder builder) throws Exception {
+            return builder
+                    .withValue(CommonDataKinds.Organization.COMPANY, object.company)
+                    .withValue(CommonDataKinds.Organization.TITLE, object.title)
+                    .withValue(CommonDataKinds.Organization.DEPARTMENT, object.department)
+                    .withValue(CommonDataKinds.Organization.JOB_DESCRIPTION, object.job)
+                    .withValue(CommonDataKinds.Organization.SYMBOL, object.symbol)
+                    .withValue(CommonDataKinds.Organization.OFFICE_LOCATION, object.office);
         }
 
         @Override

@@ -1,5 +1,8 @@
 package cz.mff.mobapp.model.infos;
 
+import android.content.ContentProviderOperation.Builder;
+import android.provider.ContactsContract.CommonDataKinds;
+
 import org.json.JSONObject;
 
 import cz.mff.mobapp.model.ContactInfo;
@@ -26,6 +29,13 @@ public class Phone implements ContactInfo {
         public void storeToJSON(Phone object, JSONObject jsonObject) throws Exception {
             jsonObject.put(PHONE_NUMBER_KEY, object.number);
             jsonObject.put(PHONE_TYPE_KEY, object.type);
+        }
+
+        @Override
+        public Builder storeToBuilder(Phone object, Builder builder) throws Exception {
+                return builder
+                        .withValue(CommonDataKinds.Phone.NUMBER, object.number)
+                        .withValue(CommonDataKinds.Phone.TYPE, object.type);
         }
 
         @Override
