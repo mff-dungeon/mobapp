@@ -22,7 +22,7 @@ import cz.mff.mobapp.event.TryCatch;
 
 public class Requester {
 
-    private static final String API = "http://mobapp-server.herokuapp.com/api/";
+    private static final String API = "https://mobapp-server.herokuapp.com/api/";
     private static final String TAG = "requester";
 
     private RequestQueue queue = null;
@@ -85,9 +85,20 @@ public class Requester {
             }
         };
 
-        Log.v(TAG, "Sending request...");
+        Log.v(TAG, String.format("%s %s", methodToString(method), API + url));
 
         queue.add(jsonRequest);
+    }
+
+    private static String methodToString(int method) {
+        switch (method) {
+            case Request.Method.GET: return "GET";
+            case Request.Method.POST: return "POST";
+            case Request.Method.PUT: return "PUT";
+            case Request.Method.DELETE: return "DELETE";
+        }
+
+        return "UNKNOWN";
     }
 
     public void getRequest(String url, RequestAuthProvider authProvider, Listener<Response> listener) {
