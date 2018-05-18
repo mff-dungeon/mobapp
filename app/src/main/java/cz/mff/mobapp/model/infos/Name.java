@@ -1,5 +1,8 @@
 package cz.mff.mobapp.model.infos;
 
+import android.content.ContentProviderOperation;
+import android.provider.ContactsContract.CommonDataKinds.StructuredName;
+
 import org.json.JSONObject;
 
 import cz.mff.mobapp.model.ContactInfo;
@@ -42,6 +45,12 @@ public class Name implements ContactInfo {
             jsonObject.put(NAME_PREFIX_KEY, object.prefix);
             jsonObject.put(NAME_MIDDLE_KEY, object.middleName);
             jsonObject.put(NAME_SUFFIX_KEY, object.suffix);
+        }
+
+        @Override
+        public ContentProviderOperation.Builder storeToBuilder(Name object, ContentProviderOperation.Builder builder) throws Exception {
+            return builder.withValue(StructuredName.DISPLAY_NAME, object.displayName)
+                    /* FIXME */;
         }
 
         @Override
