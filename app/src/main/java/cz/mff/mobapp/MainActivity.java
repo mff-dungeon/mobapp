@@ -152,7 +152,7 @@ public class MainActivity extends Activity implements ExceptionListener, Authent
 
     private void createDeleteBundle() {
         Contact c = new Contact();
-        c.setContact(true);
+        //c.setContact(true);
 
         manager.save(c, new TryCatch<>(
                 contact -> {

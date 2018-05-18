@@ -9,7 +9,6 @@ import cz.mff.mobapp.AuthenticatedActivity;
 import cz.mff.mobapp.ContactsActivity;
 import cz.mff.mobapp.api.APIStorage;
 import cz.mff.mobapp.api.Requester;
-import cz.mff.mobapp.api.SerializerFactory;
 import cz.mff.mobapp.api.TokenAuthProvider;
 import cz.mff.mobapp.auth.AccountSession;
 import cz.mff.mobapp.di.CachedService;
@@ -51,10 +50,10 @@ public class ServiceLocator {
 
     public APIStorage<Contact, UUID> createContactAPIStorage()
     {
-        return new APIStorage<>("contacts", getRequester(), SerializerFactory.getContactSerializer(), Contact::new, Contact::copy);
+        return new APIStorage<>("contacts", getRequester(), Contact.handler);
     }
 
-    private CachedService<Manager<Contact, UUID>> contactAPIManagerCached = new CachedService<>(() -> new Manager<>(createContactAPIStorage(), Contact::copy));
+    private CachedService<Manager<Contact, UUID>> contactAPIManagerCached = new CachedService<>(() -> new Manager<>(createContactAPIStorage(), Contact.handler));
 
     public Manager<Contact, UUID> getContactAPIManager() {
         return contactAPIManagerCached.get();

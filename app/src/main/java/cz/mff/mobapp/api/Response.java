@@ -1,7 +1,9 @@
 package cz.mff.mobapp.api;
 
-import android.icu.text.DateFormat;
-import android.icu.text.SimpleDateFormat;
+import android.annotation.SuppressLint;
+
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -14,8 +16,10 @@ import java.util.Date;
 public class Response {
 
     public final int API_VERSION = 1;
-    static final DateFormat timeFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
     private final int code;
+
+    @SuppressLint("SimpleDateFormat")
+    public static final DateFormat timeFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
 
     protected Date time;
 

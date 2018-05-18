@@ -1,46 +1,38 @@
 package cz.mff.mobapp.api;
 
-import android.util.Log;
-
 import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
 
-import cz.mff.mobapp.event.ExceptionListener;
 import cz.mff.mobapp.event.Listener;
 import cz.mff.mobapp.event.TryCatch;
-import cz.mff.mobapp.model.Factory;
+import cz.mff.mobapp.model.EntityHandler;
 import cz.mff.mobapp.model.Identifiable;
 import cz.mff.mobapp.model.Storage;
-import cz.mff.mobapp.model.Updater;
 
 public class APIStorage<T extends Identifiable<I>, I> implements Storage<T, I> {
 
     private static final String TAG = "APIStorage";
     private final String url;
     private final Requester requester;
-    private final Serializer<T> serializer;
-    private final Factory<T> factory;
-    private final Updater<T, T> updater;
+    private final EntityHandler<T> handler;
 
-    public APIStorage(String url, Requester requester, Serializer<T> serializer, Factory<T> factory, Updater<T, T> updater) {
+    public APIStorage(String url, Requester requester, EntityHandler<T> handler) {
         this.url = url;
         this.requester = requester;
-        this.serializer = serializer;
-        this.factory = factory;
-        this.updater = updater;
+        this.handler = handler;
     }
 
     private T createInstance(JSONObject jsonObject) throws Exception {
-        T instance = factory.create();
-        serializer.load(instance, jsonObject);
+        T instance = handler.create();
+        handler.loadFromJSON(instance, jsonObject);
         return instance;
     }
 
     private T updateInstance(T instance, JSONObject jsonObject) throws Exception {
         T updated = createInstance(jsonObject);
-        updater.update(updated, instance);
+        handler.update(updated, instance);
         return instance;
     }
 
@@ -64,7 +56,7 @@ public class APIStorage<T extends Identifiable<I>, I> implements Storage<T, I> {
         try {
             I id = object.getId();
             JSONObject jsonObject = new JSONObject();
-            serializer.store(object, jsonObject);
+            handler.storeToJSON(object, jsonObject);
             requester.putRequest(url + "/" + id.toString() + "/", jsonObject, new TryCatch<>(
                     response -> listener.doTry(updateInstance(object, response.getObjectData())),
                     listener));
@@ -79,7 +71,7 @@ public class APIStorage<T extends Identifiable<I>, I> implements Storage<T, I> {
 
         try {
             JSONObject jsonObject = new JSONObject();
-            serializer.store(object, jsonObject);
+            handler.storeToJSON(object, jsonObject);
             requester.postRequest(url + "/", jsonObject, new TryCatch<>(
                     response -> listener.doTry(updateInstance(object, response.getObjectData())),
                     listener));

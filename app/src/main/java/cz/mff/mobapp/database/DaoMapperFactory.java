@@ -27,8 +27,8 @@ public class DaoMapperFactory {
 
             @Override
             public void convertFromDao(@NonNull ContactData from, @NonNull Contact to) {
-                to.setId(from.getId());
-                to.setLastModified(from.getLastModified());
+                //to.setId(from.getId());
+                //to.setLastModified(from.getLastModified());
                 JSONObject jsonObject = from.getData();
 
                 String label = jsonObject.optString("label");

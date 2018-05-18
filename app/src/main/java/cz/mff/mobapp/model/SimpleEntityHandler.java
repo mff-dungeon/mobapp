@@ -1,17 +1,17 @@
 package cz.mff.mobapp.model;
 
-abstract public class SimpleContactInfoHandler<T extends ContactInfo> implements ContactInfoHandler {
+abstract public class SimpleEntityHandler<T> implements EntityHandler<T> {
 
     private final Class<T> cls;
     private final Factory<T> factory;
 
-    protected SimpleContactInfoHandler(Class<T> klass, Factory<T> factory) {
+    protected SimpleEntityHandler(Class<T> klass, Factory<T> factory) {
         this.cls = klass;
         this.factory = factory;
     }
 
     @Override
-    public ContactInfo create() {
+    public T create() {
         return factory.create();
     }
 

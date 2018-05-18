@@ -1,6 +1,7 @@
 package cz.mff.mobapp.model;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import cz.mff.mobapp.event.Listener;
@@ -9,11 +10,11 @@ import cz.mff.mobapp.event.TryCatch;
 public class Manager<T extends Identifiable<I>, I> {
 
     private final Storage<T, I> storage;
-    public final Updater<T, T> updater;
+    public final EntityHandler<T> handler;
 
-    public Manager(Storage<T, I> storage, Updater<T, T> updater) {
+    public Manager(Storage<T, I> storage, EntityHandler<T> handler) {
         this.storage = storage;
-        this.updater = updater;
+        this.handler = handler;
     }
 
     public void retrieve(I id, Listener<? super T> listener) {
@@ -23,12 +24,12 @@ public class Manager<T extends Identifiable<I>, I> {
     public void save(T object, Listener<? super T> listener) {
         if (object.getId() != null)
             storage.update(object, new TryCatch<>(updated -> {
-                updater.update(updated, object);
+                handler.update(updated, object);
                 listener.doTry(object);
             }, listener));
         else
             storage.create(object, new TryCatch<>(updated -> {
-                updater.update(updated, object);
+                handler.update(updated, object);
                 listener.doTry(object);
             }, listener));
     }
