@@ -7,7 +7,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
-public class DummyAuthenticator implements IServerAuthenticator {
+public class DummyAuthenticator {
 
     /**
      * A dummy authentication store containing known user names and passwords.
@@ -21,13 +21,6 @@ public class DummyAuthenticator implements IServerAuthenticator {
         mCredentialsRepo = Collections.unmodifiableMap(credentials);
     }
 
-    @Override
-    public String signUp(String email, String username, String password) {
-        // TODO: register new user on the server and return its auth token
-        return null;
-    }
-
-    @Override
     public String signIn(String email, String password) {
         String authToken = null;
         final DateFormat df = new SimpleDateFormat("yyyyMMdd-HHmmss");

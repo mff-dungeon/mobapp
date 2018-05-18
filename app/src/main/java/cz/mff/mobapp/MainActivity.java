@@ -19,6 +19,8 @@ import org.json.JSONObject;
 import java.util.UUID;
 
 import cz.mff.mobapp.api.Requester;
+import cz.mff.mobapp.api.TokenAuthProvider;
+import cz.mff.mobapp.auth.AccountSession;
 import cz.mff.mobapp.auth.AccountUtils;
 import cz.mff.mobapp.auth.AuthPreferences;
 import cz.mff.mobapp.event.ExceptionListener;
@@ -32,15 +34,11 @@ public class MainActivity extends Activity implements ExceptionListener {
     public static final String UPDATE_DONE = "cz.mff.mobapp.UPDATE_DONE";
 
     private static final String TAG = "MainActivity";
-    private static final int REQ_SIGNUP = 1;
 
+    private AccountSession accountSession;
     private Requester requester;
     private Manager<Contact, UUID> manager;
     private final UUID testBundleId = UUID.fromString("41795d9e-3cc9-4771-b88a-b0099516a753");
-
-    private AccountManager mAccountManager;
-    private AuthPreferences mAuthPreferences;
-    private String authToken;
 
     private void sendRequest() {
         requester.getRequest("bundles/", new TryCatch<>(
@@ -59,11 +57,9 @@ public class MainActivity extends Activity implements ExceptionListener {
     protected void onCreate(android.os.Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        authToken = null;
-        mAuthPreferences = new AuthPreferences(this);
-        mAccountManager = AccountManager.get(this);
+        accountSession = new AccountSession(this);
 
-        requester = new Requester("test", "test");
+        requester = new Requester(null);
         requester.initializeQueue(this);
 
         ServiceLocator sf = new ServiceLocator(this);
@@ -78,53 +74,21 @@ public class MainActivity extends Activity implements ExceptionListener {
         findViewById(R.id.createDeleteButton).setOnClickListener(view -> createDeleteBundle());
         findViewById(R.id.shareTicketButton).setOnClickListener(view -> shareTicket("33319b2f-f891-40b0-a23f-bcdaa9b71857"));
 
+        accountSession.retrieveToken(new TryCatch<>(
+                token -> { onAuthenticated(); },
+                err -> {
+                    err.printStackTrace();
+                    finish();
+                }
+        ));
+    }
+
+    private void onAuthenticated() {
+        requester.setDefaultAuthProvider(new TokenAuthProvider(accountSession.getAuthToken()));
+
         boolean handled = tryHandleIntent(getIntent());
         if (!handled) {
             askUserForTicketId();
-        }
-
-        mAccountManager.getAuthTokenByFeatures(AccountUtils.ACCOUNT_TYPE, AccountUtils.AUTH_TOKEN_TYPE,
-                null, this, null, null, new GetAuthTokenCallback(), null);
-    }
-
-    private class GetAuthTokenCallback implements AccountManagerCallback<Bundle> {
-
-        @Override
-        public void run(AccountManagerFuture<Bundle> result) {
-            Bundle bundle;
-
-            try {
-                bundle = result.getResult();
-
-                final Intent intent = (Intent) bundle.get(AccountManager.KEY_INTENT);
-                if (null != intent) {
-                    startActivityForResult(intent, REQ_SIGNUP);
-                } else {
-                    authToken = bundle.getString(AccountManager.KEY_AUTHTOKEN);
-                    final String accountName = bundle.getString(AccountManager.KEY_ACCOUNT_NAME);
-
-                    // Save session username & auth token
-                    mAuthPreferences.setAuthToken(authToken);
-                    mAuthPreferences.setUsername(accountName);
-
-                    System.out.println("[auth] Retrieved auth token: " + authToken);
-                    System.out.println("[auth] Saved account name: " + mAuthPreferences.getAccountName());
-                    System.out.println("[auth] Saved auth token: " + mAuthPreferences.getAuthToken());
-
-                    // If the logged account didn't exist, we need to create it on the device
-                    Account account = AccountUtils.getAccount(MainActivity.this, accountName);
-                    if (null == account) {
-                        account = new Account(accountName, AccountUtils.ACCOUNT_TYPE);
-                        mAccountManager.addAccountExplicitly(account, bundle.getString(LoginActivity.PARAM_USER_PASSWORD), null);
-                        mAccountManager.setAuthToken(account, AccountUtils.AUTH_TOKEN_TYPE, authToken);
-                    }
-                }
-            } catch (OperationCanceledException e) {
-                // If signup was cancelled, force activity termination
-                finish();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
         }
     }
 

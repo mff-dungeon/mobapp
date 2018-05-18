@@ -25,24 +25,19 @@ public class Requester {
     private static final String API = "http://mobapp-server.herokuapp.com/api/";
     private static final String TAG = "requester";
 
-    final String username, password;
-
     private RequestQueue queue = null;
+    private RequestAuthProvider defaultAuthProvider;
 
-    public Requester(String username, String password) {
-        this.username = username;
-        this.password = password;
+    public Requester(RequestAuthProvider defaultAuthProvider) {
+        this.defaultAuthProvider = defaultAuthProvider;
     }
 
-    private String encodeUserPass() {
-        try {
-            return Base64.encodeToString((username + ":" + password).getBytes("UTF-8"),
-                    Base64.DEFAULT);
-        }
-        catch (UnsupportedEncodingException ignored) {
-            // Doesn't happen for UTF-8
-            return null;
-        }
+    public RequestAuthProvider getDefaultAuthProvider() {
+        return defaultAuthProvider;
+    }
+
+    public void setDefaultAuthProvider(RequestAuthProvider defaultAuthProvider) {
+        this.defaultAuthProvider = defaultAuthProvider;
     }
 
     public void initializeQueue(Context context) {
@@ -54,7 +49,7 @@ public class Requester {
         queue.stop();
     }
 
-    private void request(int method, String url, JSONObject data, Listener<Response> listener) {
+    private void request(int method, String url, JSONObject data, RequestAuthProvider authProvider, Listener<Response> listener) {
         TryCatch<JSONObject> tryListener = new TryCatch<>(
                 response -> {
                     Log.v(TAG, "Got OK response: " + response.toString());
@@ -84,8 +79,8 @@ public class Requester {
         {
             @Override
             public Map<String, String> getHeaders() {
-                Map<String, String> headers = new HashMap<>();
-                headers.put("Authorization", "Basic " + encodeUserPass());
+                Map<String, String> headers = authProvider != null ? authProvider.getAuthorizationHeaders() : new HashMap<>();
+                // TODO: add more headers?
                 return headers;
             }
         };
@@ -95,20 +90,36 @@ public class Requester {
         queue.add(jsonRequest);
     }
 
+    public void getRequest(String url, RequestAuthProvider authProvider, Listener<Response> listener) {
+        request(Request.Method.GET, url, null, authProvider, listener);
+    }
+
+    public void putRequest(String url, JSONObject jsonObject, RequestAuthProvider authProvider, Listener<Response> listener) {
+        request(Request.Method.PUT, url, jsonObject, authProvider, listener);
+    }
+
+    public void postRequest(String url, JSONObject jsonObject, RequestAuthProvider authProvider, Listener<Response> listener) {
+        request(Request.Method.POST, url, jsonObject, authProvider, listener);
+    }
+
+    public void deleteRequest(String url, RequestAuthProvider authProvider, Listener<Response> listener) {
+        request(Request.Method.DELETE, url, null, authProvider, listener);
+    }
+
     public void getRequest(String url, Listener<Response> listener) {
-        request(Request.Method.GET, url, null, listener);
+        request(Request.Method.GET, url, null, defaultAuthProvider, listener);
     }
 
     public void putRequest(String url, JSONObject jsonObject, Listener<Response> listener) {
-        request(Request.Method.PUT, url, jsonObject, listener);
+        request(Request.Method.PUT, url, jsonObject, defaultAuthProvider, listener);
     }
 
     public void postRequest(String url, JSONObject jsonObject, Listener<Response> listener) {
-        request(Request.Method.POST, url, jsonObject, listener);
+        request(Request.Method.POST, url, jsonObject, defaultAuthProvider, listener);
     }
 
     public void deleteRequest(String url, Listener<Response> listener) {
-        request(Request.Method.DELETE, url, null, listener);
+        request(Request.Method.DELETE, url, null, defaultAuthProvider, listener);
     }
 
 }
