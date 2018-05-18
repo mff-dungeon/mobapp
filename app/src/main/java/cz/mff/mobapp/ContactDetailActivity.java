@@ -12,12 +12,11 @@ import android.widget.TextView;
 import android.provider.ContactsContract.Data;
 import android.widget.Toast;
 
+import cz.mff.mobapp.auth.AccountUtils;
 import cz.mff.mobapp.gui.ServiceLocator;
 
 public class ContactDetailActivity extends Activity implements AuthenticatedActivity {
 
-    // FIXME: this field is application specific
-    private static final String MOBAPP_ACCOUNT_TYPE = "com.google";
     private String accountName;
 
     private ServiceLocator serviceLocator;
@@ -60,7 +59,7 @@ public class ContactDetailActivity extends Activity implements AuthenticatedActi
 
     private void loadContact() {
         Cursor rawContact = getContentResolver().query(RawContacts.CONTENT_URI.buildUpon()
-                        .appendQueryParameter(RawContacts.ACCOUNT_TYPE, MOBAPP_ACCOUNT_TYPE)
+                        .appendQueryParameter(RawContacts.ACCOUNT_TYPE, AccountUtils.ACCOUNT_TYPE)
                         .appendQueryParameter(RawContacts.ACCOUNT_NAME, accountName)
                         .build(),
                 new String[] {RawContacts._ID, RawContacts.CONTACT_ID, RawContacts.SOURCE_ID},

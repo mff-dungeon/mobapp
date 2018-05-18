@@ -23,6 +23,7 @@ import android.widget.TextView;
 import java.util.ArrayList;
 import java.util.HashSet;
 
+import cz.mff.mobapp.auth.AccountUtils;
 import cz.mff.mobapp.gui.ServiceLocator;
 
 public class ContactsActivity extends Activity implements AuthenticatedActivity {
@@ -40,8 +41,6 @@ public class ContactsActivity extends Activity implements AuthenticatedActivity 
     }
 
     private static final int PERMISSION_REQUEST_READ_CONTACTS = 7;
-    // FIXME: this field is application specific
-    private static final String MOBAPP_ACCOUNT_TYPE = "com.google";
 
     private static final String[] PROJECTION =
             {
@@ -80,7 +79,7 @@ public class ContactsActivity extends Activity implements AuthenticatedActivity 
 
     private void loadContacts() {
         final Cursor rawContacts = getContentResolver().query(ContactsContract.RawContacts.CONTENT_URI.buildUpon()
-                        .appendQueryParameter(ContactsContract.RawContacts.ACCOUNT_TYPE, MOBAPP_ACCOUNT_TYPE)
+                        .appendQueryParameter(ContactsContract.RawContacts.ACCOUNT_TYPE, AccountUtils.ACCOUNT_TYPE)
                         .appendQueryParameter(ContactsContract.RawContacts.ACCOUNT_NAME, accountName)
                         .build(),
                 new String[] {ContactsContract.RawContacts.CONTACT_ID},

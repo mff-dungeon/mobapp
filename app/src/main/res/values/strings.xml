@@ -106,6 +106,6 @@
     <string name="action_sign_in_short">Sign in</string>
     <string name="action_sign_in_register">Sign In</string>
     <string name="contact_detail_label">Label</string>
-    <string name="account_type">mobapp.mff.cz</string>
+    <string name="account_type">cz.mff.mobapp</string>
     <string name="login_prompt">To use MobApp, please sign in.</string>
 </resources>
