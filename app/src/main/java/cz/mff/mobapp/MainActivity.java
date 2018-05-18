@@ -19,13 +19,8 @@ import org.json.JSONObject;
 import java.util.UUID;
 
 import cz.mff.mobapp.api.Requester;
-import cz.mff.mobapp.api.SerializerFactory;
 import cz.mff.mobapp.auth.AccountUtils;
 import cz.mff.mobapp.auth.AuthPreferences;
-import cz.mff.mobapp.database.AppDatabase;
-import cz.mff.mobapp.database.ContactData;
-import cz.mff.mobapp.database.DaoMapperFactory;
-import cz.mff.mobapp.database.DatabaseStorage;
 import cz.mff.mobapp.event.ExceptionListener;
 import cz.mff.mobapp.event.TryCatch;
 import cz.mff.mobapp.gui.ServiceFactory;
@@ -49,10 +44,10 @@ public class MainActivity extends Activity implements ExceptionListener {
 
     private void sendRequest() {
         requester.getRequest("bundles/", new TryCatch<>(
-            response -> {
-                JSONArray data = response.getArrayData();
-                ((TextView) findViewById(R.id.responseText)).setText(data.toString());
-            }, this));
+                response -> {
+                    JSONArray data = response.getArrayData();
+                    ((TextView) findViewById(R.id.responseText)).setText(data.toString());
+                }, this));
     }
 
     private void showBundlesActivity() {
@@ -88,7 +83,8 @@ public class MainActivity extends Activity implements ExceptionListener {
             askUserForTicketId();
         }
 
-        mAccountManager.getAuthTokenByFeatures(AccountUtils.ACCOUNT_TYPE, AccountUtils.AUTH_TOKEN_TYPE, null, this, null, null, new GetAuthTokenCallback(), null);
+        mAccountManager.getAuthTokenByFeatures(AccountUtils.ACCOUNT_TYPE, AccountUtils.AUTH_TOKEN_TYPE,
+                null, this, null, null, new GetAuthTokenCallback(), null);
     }
 
     private class GetAuthTokenCallback implements AccountManagerCallback<Bundle> {
@@ -123,14 +119,13 @@ public class MainActivity extends Activity implements ExceptionListener {
                         mAccountManager.setAuthToken(account, AccountUtils.AUTH_TOKEN_TYPE, authToken);
                     }
                 }
-            } catch(OperationCanceledException e) {
+            } catch (OperationCanceledException e) {
                 // If signup was cancelled, force activity termination
                 finish();
-            } catch(Exception e) {
+            } catch (Exception e) {
                 e.printStackTrace();
             }
         }
-
     }
 
     private void updateBundle() {
@@ -148,8 +143,7 @@ public class MainActivity extends Activity implements ExceptionListener {
     private void subscribeToTicket(String ticketId) {
         System.out.printf("cloning ticket %s\n", ticketId);
         requester.putRequest(String.format("clone/%s/", ticketId), new JSONObject(),
-            new TryCatch<>(
-                response -> {
+                new TryCatch<>(response -> {
                     JSONObject data = response.getObjectData();
                     System.out.printf("ticket clone succeeded, clone has id: %s\n", data.get("id"));
 

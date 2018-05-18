@@ -19,10 +19,10 @@ import cz.mff.mobapp.model.Manager;
 
 public class ServiceFactory {
 
-    private final Activity activity;
+    private final Context activity;
     private static final String DB_NAME = "test-database2";
 
-    public ServiceFactory(Activity activity) {
+    public ServiceFactory(Context activity) {
         this.activity = activity;
     }
 
