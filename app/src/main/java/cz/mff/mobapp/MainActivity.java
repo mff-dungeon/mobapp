@@ -35,13 +35,12 @@ public class MainActivity extends Activity implements ExceptionListener {
 
     private static final String TAG = "MainActivity";
 
-    private AccountSession accountSession;
-    private Requester requester;
+    private ServiceLocator serviceLocator;
     private Manager<Contact, UUID> manager;
     private final UUID testBundleId = UUID.fromString("41795d9e-3cc9-4771-b88a-b0099516a753");
 
     private void sendRequest() {
-        requester.getRequest("bundles/", new TryCatch<>(
+        serviceLocator.getRequester().getRequest("bundles/", new TryCatch<>(
                 response -> {
                     JSONArray data = response.getArrayData();
                     ((TextView) findViewById(R.id.responseText)).setText(data.toString());
@@ -57,14 +56,6 @@ public class MainActivity extends Activity implements ExceptionListener {
     protected void onCreate(android.os.Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        accountSession = new AccountSession(this);
-
-        requester = new Requester(null);
-        requester.initializeQueue(this);
-
-        ServiceLocator sf = new ServiceLocator(this);
-        manager = sf.createContactManager();
-
         setContentView(R.layout.activity_main);
 
         findViewById(R.id.requestButton).setOnClickListener(view -> sendRequest());
@@ -74,7 +65,8 @@ public class MainActivity extends Activity implements ExceptionListener {
         findViewById(R.id.createDeleteButton).setOnClickListener(view -> createDeleteBundle());
         findViewById(R.id.shareTicketButton).setOnClickListener(view -> shareTicket("33319b2f-f891-40b0-a23f-bcdaa9b71857"));
 
-        accountSession.retrieveToken(new TryCatch<>(
+        serviceLocator = new ServiceLocator(this);
+        serviceLocator.ensureAuthenticated(new TryCatch<>(
                 token -> { onAuthenticated(); },
                 err -> {
                     err.printStackTrace();
@@ -84,7 +76,7 @@ public class MainActivity extends Activity implements ExceptionListener {
     }
 
     private void onAuthenticated() {
-        requester.setDefaultAuthProvider(new TokenAuthProvider(accountSession.getAuthToken()));
+        manager = serviceLocator.createContactManager();
 
         boolean handled = tryHandleIntent(getIntent());
         if (!handled) {
@@ -106,7 +98,7 @@ public class MainActivity extends Activity implements ExceptionListener {
 
     private void subscribeToTicket(String ticketId) {
         System.out.printf("cloning ticket %s\n", ticketId);
-        requester.putRequest(String.format("clone/%s/", ticketId), new JSONObject(),
+        serviceLocator.getRequester().putRequest(String.format("clone/%s/", ticketId), new JSONObject(),
                 new TryCatch<>(response -> {
                     JSONObject data = response.getObjectData();
                     System.out.printf("ticket clone succeeded, clone has id: %s\n", data.get("id"));
