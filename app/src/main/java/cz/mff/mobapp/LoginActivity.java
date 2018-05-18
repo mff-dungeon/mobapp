@@ -15,12 +15,9 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.TextView;
 
-import java.util.concurrent.Semaphore;
-
 import cz.mff.mobapp.auth.AccountUtils;
 import cz.mff.mobapp.auth.ServerAuthenticator;
 import cz.mff.mobapp.event.SyncTryCatch;
-import cz.mff.mobapp.event.TryCatch;
 
 public class LoginActivity extends AccountAuthenticatorActivity {
 
@@ -29,81 +26,81 @@ public class LoginActivity extends AccountAuthenticatorActivity {
     public static final String ARG_IS_ADDING_NEW_ACCOUNT = "isAddingNewAccount";
     public static final String PARAM_USER_PASSWORD = "password";
 
-    private AccountManager mAccountManager;
-    private UserLoginTask mAuthTask = null;
+    private AccountManager accountManager;
+    private UserLoginTask authTask = null;
     private ServerAuthenticator serverAuthenticator;
 
-    private String mEmail;
-    private String mPassword;
+    private String username;
+    private String password;
 
-    private EditText mEmailView;
-    private EditText mPasswordView;
-    private View mLoginFormView;
-    private View mLoginStatusView;
-    private TextView mLoginStatusMessageView;
+    private EditText usernameView;
+    private EditText passwordView;
+    private View loginFormView;
+    private View loginStatusView;
+    private TextView loginStatusMessageView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
 
-        mAccountManager = AccountManager.get(this);
+        accountManager = AccountManager.get(this);
         serverAuthenticator = new ServerAuthenticator(this);
 
-        mEmail = getIntent().getStringExtra(AccountManager.KEY_ACCOUNT_NAME);
-        mEmailView = findViewById(R.id.email);
-        mEmailView.setText(mEmail);
-        mPasswordView = findViewById(R.id.password);
-        mLoginFormView = findViewById(R.id.login_form);
-        mLoginStatusView = findViewById(R.id.login_status);
-        mLoginStatusMessageView = findViewById(R.id.login_status_message);
+        username = getIntent().getStringExtra(AccountManager.KEY_ACCOUNT_NAME);
+        usernameView = findViewById(R.id.email);
+        usernameView.setText(username);
+
+        passwordView = findViewById(R.id.password);
+        loginFormView = findViewById(R.id.login_form);
+        loginStatusView = findViewById(R.id.login_status);
+        loginStatusMessageView = findViewById(R.id.login_status_message);
 
         findViewById(R.id.sign_in_button).setOnClickListener(view -> performLogin());
 
-        if (null != mEmail) {
-            if (!mEmail.isEmpty()) {
-                mPasswordView.requestFocus();
+        if (null != username) {
+            if (!username.isEmpty()) {
+                passwordView.requestFocus();
             }
         }
     }
 
     private void performLogin() {
-        if (mAuthTask != null) {
+        if (authTask != null) {
             return;
         }
 
+        usernameView.clearFocus();
+        passwordView.clearFocus();
+
         // Reset errors.
-        mEmailView.setError(null);
-        mPasswordView.setError(null);
+        usernameView.setError(null);
+        passwordView.setError(null);
 
         // Store values at the time of the login attempt.
-        mEmail = mEmailView.getText().toString();
-        mPassword = mPasswordView.getText().toString();
+        username = usernameView.getText().toString();
+        password = passwordView.getText().toString();
 
         boolean cancel = false;
         View focusView = null;
 
         // Check for a valid password.
-        if (TextUtils.isEmpty(mPassword)) {
-            mPasswordView.setError(getString(R.string.error_field_required));
-            focusView = mPasswordView;
+        if (TextUtils.isEmpty(password)) {
+            passwordView.setError(getString(R.string.error_field_required));
+            focusView = passwordView;
             cancel = true;
-        } else if (mPassword.length() < 4) {
-            mPasswordView.setError(getString(R.string.error_invalid_password));
-            focusView = mPasswordView;
+        } else if (password.length() < 4) {
+            passwordView.setError(getString(R.string.error_invalid_password));
+            focusView = passwordView;
             cancel = true;
         }
 
         // Check for a valid email address.
-        if (TextUtils.isEmpty(mEmail)) {
-            mEmailView.setError(getString(R.string.error_field_required));
-            focusView = mEmailView;
+        if (TextUtils.isEmpty(username)) {
+            usernameView.setError(getString(R.string.error_field_required));
+            focusView = usernameView;
             cancel = true;
-        }/* FIXME else if (!mEmail.contains("@")) {
-            mEmailView.setError(getString(R.string.error_invalid_email));
-            focusView = mEmailView;
-            cancel = true;
-        }*/
+        }
 
         if (cancel) {
             // There was an error; don't attempt login and focus the first
@@ -112,10 +109,10 @@ public class LoginActivity extends AccountAuthenticatorActivity {
         } else {
             // Show a progress spinner, and kick off a background task to
             // perform the user login attempt.
-            mLoginStatusMessageView.setText(R.string.login_progress_signing_in);
+            loginStatusMessageView.setText(R.string.login_progress_signing_in);
             showProgress(true);
-            mAuthTask = new UserLoginTask(serverAuthenticator);
-            mAuthTask.execute((Void) null);
+            authTask = new UserLoginTask(serverAuthenticator);
+            authTask.execute((Void) null);
         }
     }
 
@@ -128,30 +125,30 @@ public class LoginActivity extends AccountAuthenticatorActivity {
             int shortAnimTime = getResources().getInteger(
                     android.R.integer.config_shortAnimTime);
 
-            mLoginStatusView.setVisibility(View.VISIBLE);
-            mLoginStatusView.animate().setDuration(shortAnimTime)
+            loginStatusView.setVisibility(View.VISIBLE);
+            loginStatusView.animate().setDuration(shortAnimTime)
                     .alpha(show ? 1 : 0)
                     .setListener(new AnimatorListenerAdapter() {
                         @Override
                         public void onAnimationEnd(Animator animation) {
-                            mLoginStatusView.setVisibility(show ? View.VISIBLE : View.GONE);
+                            loginStatusView.setVisibility(show ? View.VISIBLE : View.GONE);
                         }
                     });
 
-            mLoginFormView.setVisibility(View.VISIBLE);
-            mLoginFormView.animate().setDuration(shortAnimTime)
+            loginFormView.setVisibility(View.VISIBLE);
+            loginFormView.animate().setDuration(shortAnimTime)
                     .alpha(show ? 0 : 1)
                     .setListener(new AnimatorListenerAdapter() {
                         @Override
                         public void onAnimationEnd(Animator animation) {
-                            mLoginFormView.setVisibility(show ? View.GONE : View.VISIBLE);
+                            loginFormView.setVisibility(show ? View.GONE : View.VISIBLE);
                         }
                     });
         } else {
             // The ViewPropertyAnimator APIs are not available, so simply show
             // and hide the relevant UI components.
-            mLoginStatusView.setVisibility(show ? View.VISIBLE : View.GONE);
-            mLoginFormView.setVisibility(show ? View.GONE : View.VISIBLE);
+            loginStatusView.setVisibility(show ? View.VISIBLE : View.GONE);
+            loginFormView.setVisibility(show ? View.GONE : View.VISIBLE);
         }
     }
 
@@ -165,28 +162,28 @@ public class LoginActivity extends AccountAuthenticatorActivity {
         @Override
         protected Intent doInBackground(Void... params) {
             final SyncTryCatch<String> waitListener = new SyncTryCatch<>();
-            serverAuthenticator.retrieveToken(mEmail, mPassword, waitListener);
+            serverAuthenticator.retrieveToken(username, password, waitListener);
 
             // block until the token is available
             final String authToken = waitListener.getOrNull();
 
             final Intent res = new Intent();
-            res.putExtra(AccountManager.KEY_ACCOUNT_NAME, mEmail);
+            res.putExtra(AccountManager.KEY_ACCOUNT_NAME, username);
             res.putExtra(AccountManager.KEY_ACCOUNT_TYPE, AccountUtils.ACCOUNT_TYPE);
             res.putExtra(AccountManager.KEY_AUTHTOKEN, authToken);
-            res.putExtra(PARAM_USER_PASSWORD, mPassword);
+            res.putExtra(PARAM_USER_PASSWORD, password);
 
             return res;
         }
 
         @Override
         protected void onPostExecute(final Intent intent) {
-            mAuthTask = null;
+            authTask = null;
             showProgress(false);
 
             if (null == intent.getStringExtra(AccountManager.KEY_AUTHTOKEN)) {
-                mPasswordView.setError(getString(R.string.error_incorrect_password));
-                mPasswordView.requestFocus();
+                passwordView.setError(getString(R.string.error_incorrect_password));
+                passwordView.requestFocus();
             } else {
                 finishLogin(intent);
             }
@@ -194,7 +191,7 @@ public class LoginActivity extends AccountAuthenticatorActivity {
 
         @Override
         protected void onCancelled() {
-            mAuthTask = null;
+            authTask = null;
             showProgress(false);
         }
 
@@ -207,10 +204,10 @@ public class LoginActivity extends AccountAuthenticatorActivity {
             if (getIntent().getBooleanExtra(ARG_IS_ADDING_NEW_ACCOUNT, false)) {
                 // Creating the account on the device and setting the auth token we got
                 // (Not setting the auth token will cause another call to the server to authenticate the user)
-                mAccountManager.addAccountExplicitly(account, accountPassword, null);
-                mAccountManager.setAuthToken(account, AccountUtils.AUTH_TOKEN_TYPE, authToken);
+                accountManager.addAccountExplicitly(account, accountPassword, null);
+                accountManager.setAuthToken(account, AccountUtils.AUTH_TOKEN_TYPE, authToken);
             } else {
-                mAccountManager.setPassword(account, accountPassword);
+                accountManager.setPassword(account, accountPassword);
             }
 
             setAccountAuthenticatorResult(intent.getExtras());
