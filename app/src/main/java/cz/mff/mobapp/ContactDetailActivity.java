@@ -17,8 +17,6 @@ import cz.mff.mobapp.gui.ServiceLocator;
 
 public class ContactDetailActivity extends Activity implements AuthenticatedActivity {
 
-    private String accountName;
-
     private ServiceLocator serviceLocator;
 
     private long contactId;
@@ -50,6 +48,8 @@ public class ContactDetailActivity extends Activity implements AuthenticatedActi
         setContentView(R.layout.activity_contact_detail);
 
         contactId = getIntent().getLongExtra("id", -1);
+
+        ServiceLocator.create(this);
     }
 
     @Override
@@ -58,6 +58,7 @@ public class ContactDetailActivity extends Activity implements AuthenticatedActi
     }
 
     private void loadContact() {
+        final String accountName = serviceLocator.getAccountSession().getAccountName();
         Cursor rawContact = getContentResolver().query(RawContacts.CONTENT_URI.buildUpon()
                         .appendQueryParameter(RawContacts.ACCOUNT_TYPE, AccountUtils.ACCOUNT_TYPE)
                         .appendQueryParameter(RawContacts.ACCOUNT_NAME, accountName)
@@ -104,7 +105,6 @@ public class ContactDetailActivity extends Activity implements AuthenticatedActi
         ((TextView) findViewById(R.id.contact_detail_label)).setText(info);
     }
 
-
     @Override
     public Activity getActivity() {
         return this;
@@ -112,7 +112,6 @@ public class ContactDetailActivity extends Activity implements AuthenticatedActi
 
     @Override
     public void onAuthenticated() {
-        // FIXME: accountName = serviceLocator.getAccountName();
         loadContact();
     }
 

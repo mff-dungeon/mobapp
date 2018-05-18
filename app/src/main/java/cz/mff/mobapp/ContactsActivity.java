@@ -73,6 +73,8 @@ public class ContactsActivity extends Activity implements AuthenticatedActivity 
         });
 
         contactList.setEmptyView(findViewById(R.id.contact_list_empty));
+
+        ServiceLocator.create(this);
     }
 
     private void loadContacts() {
