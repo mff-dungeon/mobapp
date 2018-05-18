@@ -21,13 +21,15 @@ import cz.mff.mobapp.gui.ServiceLocator;
 import cz.mff.mobapp.model.Contact;
 import cz.mff.mobapp.model.Manager;
 
-public class ContactsActivity extends Activity {
+public class ContactsActivity extends Activity implements AuthenticatedActivity {
 
     private ListView contactList;
+    private ServiceLocator serviceLocator;
 
     @Override
     protected void onStart() {
         super.onStart();
+
 
         /*AppDatabase db = Room.databaseBuilder(getApplicationContext(),
                 AppDatabase.class, "test-database2").build();
@@ -67,10 +69,7 @@ public class ContactsActivity extends Activity {
         });
         */
 
-        ServiceLocator sf = new ServiceLocator(this);
-        Manager<Contact, UUID> manager = sf.createContactManager();
-
-        loadContactData(manager);
+        ServiceLocator.create(this);
     }
 
     @Override
@@ -114,5 +113,21 @@ public class ContactsActivity extends Activity {
         };
 
         contactList.setAdapter(adapter);
+    }
+
+    @Override
+    public Activity getActivity() {
+        return this;
+    }
+
+    @Override
+    public void onAuthenticated() {
+        Manager<Contact, UUID> manager = serviceLocator.createContactManager();
+        loadContactData(manager);
+    }
+
+    @Override
+    public void setServiceLocator(ServiceLocator serviceLocator) {
+        this.serviceLocator = serviceLocator;
     }
 }

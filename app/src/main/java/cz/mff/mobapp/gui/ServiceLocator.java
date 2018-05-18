@@ -5,6 +5,8 @@ import android.content.Context;
 
 import java.util.UUID;
 
+import cz.mff.mobapp.AuthenticatedActivity;
+import cz.mff.mobapp.ContactsActivity;
 import cz.mff.mobapp.api.APIStorage;
 import cz.mff.mobapp.api.Requester;
 import cz.mff.mobapp.api.SerializerFactory;
@@ -22,7 +24,7 @@ public class ServiceLocator {
     private AccountSession accountSession;
     private static final String DB_NAME = "test-database2";
 
-    public ServiceLocator(Activity activity) {
+    protected ServiceLocator(Activity activity) {
         this.activity = activity;
         this.accountSession = new AccountSession(activity);
     }
@@ -65,6 +67,20 @@ public class ServiceLocator {
     {
         // TODO: return ApplicationManager once ready
         return getContactAPIManager();
+    }
+
+    public static void create(AuthenticatedActivity authenticatedActivity) {
+        ServiceLocator sl = new ServiceLocator(authenticatedActivity.getActivity());
+        authenticatedActivity.setServiceLocator(sl);
+        sl.ensureAuthenticated(new TryCatch<>(
+                authenticated -> {
+                    authenticatedActivity.onAuthenticated();
+                },
+                error -> {
+                    error.printStackTrace();
+                    authenticatedActivity.finish();
+                }
+        ));
     }
 
 }

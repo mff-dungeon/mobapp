@@ -1,15 +1,9 @@
 package cz.mff.mobapp;
 
-import android.accounts.Account;
-import android.accounts.AccountManager;
-import android.accounts.AccountManagerCallback;
-import android.accounts.AccountManagerFuture;
 import android.app.Activity;
 import android.content.Intent;
 import android.icu.text.DateFormat;
 import android.net.Uri;
-import android.os.Bundle;
-import android.os.OperationCanceledException;
 import android.util.Log;
 import android.widget.TextView;
 
@@ -18,18 +12,14 @@ import org.json.JSONObject;
 
 import java.util.UUID;
 
-import cz.mff.mobapp.api.Requester;
-import cz.mff.mobapp.api.TokenAuthProvider;
-import cz.mff.mobapp.auth.AccountSession;
-import cz.mff.mobapp.auth.AccountUtils;
-import cz.mff.mobapp.auth.AuthPreferences;
+import cz.mff.mobapp.api.APIEndpoints;
 import cz.mff.mobapp.event.ExceptionListener;
 import cz.mff.mobapp.event.TryCatch;
 import cz.mff.mobapp.gui.ServiceLocator;
 import cz.mff.mobapp.model.Contact;
 import cz.mff.mobapp.model.Manager;
 
-public class MainActivity extends Activity implements ExceptionListener {
+public class MainActivity extends Activity implements ExceptionListener, AuthenticatedActivity {
 
     public static final String UPDATE_DONE = "cz.mff.mobapp.UPDATE_DONE";
 
@@ -40,7 +30,7 @@ public class MainActivity extends Activity implements ExceptionListener {
     private final UUID testBundleId = UUID.fromString("41795d9e-3cc9-4771-b88a-b0099516a753");
 
     private void sendRequest() {
-        serviceLocator.getRequester().getRequest("bundles/", new TryCatch<>(
+        serviceLocator.getRequester().getRequest(APIEndpoints.BUNDLES_ENDPOINT, new TryCatch<>(
                 response -> {
                     JSONArray data = response.getArrayData();
                     ((TextView) findViewById(R.id.responseText)).setText(data.toString());
@@ -65,23 +55,27 @@ public class MainActivity extends Activity implements ExceptionListener {
         findViewById(R.id.createDeleteButton).setOnClickListener(view -> createDeleteBundle());
         findViewById(R.id.shareTicketButton).setOnClickListener(view -> shareTicket("33319b2f-f891-40b0-a23f-bcdaa9b71857"));
 
-        serviceLocator = new ServiceLocator(this);
-        serviceLocator.ensureAuthenticated(new TryCatch<>(
-                token -> { onAuthenticated(); },
-                err -> {
-                    err.printStackTrace();
-                    finish();
-                }
-        ));
+        ServiceLocator.create(this);
     }
 
-    private void onAuthenticated() {
+    @Override
+    public Activity getActivity() {
+        return this;
+    }
+
+    @Override
+    public void onAuthenticated() {
         manager = serviceLocator.createContactManager();
 
         boolean handled = tryHandleIntent(getIntent());
         if (!handled) {
             askUserForTicketId();
         }
+    }
+
+    @Override
+    public void setServiceLocator(ServiceLocator serviceLocator) {
+        this.serviceLocator = serviceLocator;
     }
 
     private void updateBundle() {
@@ -98,7 +92,7 @@ public class MainActivity extends Activity implements ExceptionListener {
 
     private void subscribeToTicket(String ticketId) {
         System.out.printf("cloning ticket %s\n", ticketId);
-        serviceLocator.getRequester().putRequest(String.format("clone/%s/", ticketId), new JSONObject(),
+        serviceLocator.getRequester().putRequest(String.format(APIEndpoints.CLONE_ENDPOINT, ticketId), new JSONObject(),
                 new TryCatch<>(response -> {
                     JSONObject data = response.getObjectData();
                     System.out.printf("ticket clone succeeded, clone has id: %s\n", data.get("id"));

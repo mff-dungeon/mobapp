@@ -12,6 +12,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import cz.mff.mobapp.api.APIEndpoints;
 import cz.mff.mobapp.api.BasicAuthProvider;
 import cz.mff.mobapp.api.Requester;
 import cz.mff.mobapp.event.Listener;
@@ -27,7 +28,7 @@ public class ServerAuthenticator {
     }
 
     public void retrieveToken(String email, String password, Listener<String> tokenListener) {
-        requester.getRequest("token/", new BasicAuthProvider(email, password), new TryCatch<>(
+        requester.getRequest(APIEndpoints.TOKEN_ENDPOINT, new BasicAuthProvider(email, password), new TryCatch<>(
                 data -> {
                     JSONObject object = data.getObjectData();
                     tokenListener.doTry(object.getString("token"));

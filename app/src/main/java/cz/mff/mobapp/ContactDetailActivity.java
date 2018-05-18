@@ -12,18 +12,23 @@ import cz.mff.mobapp.gui.ServiceLocator;
 import cz.mff.mobapp.model.Contact;
 import cz.mff.mobapp.model.Manager;
 
-public class ContactDetailActivity extends Activity {
+public class ContactDetailActivity extends Activity implements AuthenticatedActivity {
 
     private Contact contact;
     private Manager<Contact, UUID> manager;
+    private ServiceLocator serviceLocator;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_contact_detail);
 
-        ServiceLocator sf = new ServiceLocator(this);
-        manager = sf.createContactManager();
+        ServiceLocator.create(this);
+    }
+
+    @Override
+    public void onAuthenticated() {
+        manager = serviceLocator.createContactManager();
 
         loadContact((UUID) getIntent().getSerializableExtra("uuid"));
     }
@@ -41,4 +46,15 @@ public class ContactDetailActivity extends Activity {
         ((TextView) findViewById(R.id.contact_detail_modified_value)).setText(c.getLastModified().toString());
         ((TextView) findViewById(R.id.contact_detail_label)).setText(c.getLabel());
     }
+
+    @Override
+    public Activity getActivity() {
+        return this;
+    }
+
+    @Override
+    public void setServiceLocator(ServiceLocator serviceLocator) {
+        this.serviceLocator = serviceLocator;
+    }
+
 }
