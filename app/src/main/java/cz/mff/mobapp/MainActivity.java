@@ -4,6 +4,11 @@ import android.app.Activity;
 import android.content.Intent;
 import android.icu.text.DateFormat;
 import android.net.Uri;
+import android.nfc.NdefMessage;
+import android.nfc.NdefRecord;
+import android.nfc.NfcAdapter;
+import android.nfc.NfcEvent;
+import android.os.Parcelable;
 import android.util.Log;
 import android.widget.TextView;
 
@@ -71,6 +76,14 @@ public class MainActivity extends Activity implements ExceptionListener, Authent
         if (!handled) {
             askUserForTicketId();
         }
+
+        NfcAdapter nfc = NfcAdapter.getDefaultAdapter(this);
+        if (nfc != null) {
+            nfc.setNdefPushMessageCallback(event -> {
+                NdefRecord uriRecord = NdefRecord.createUri(Uri.encode("http://www.google.com/"));
+                return new NdefMessage(new NdefRecord[]{uriRecord});
+            }, this, this);
+        }
     }
 
     @Override
@@ -111,17 +124,30 @@ public class MainActivity extends Activity implements ExceptionListener, Authent
             return false;
         }
 
-        String appLinkAction = intent.getAction();
-        Uri appLinkData = intent.getData();
+        String action = intent.getAction();
+        Uri data = intent.getData();
 
-        if (appLinkData == null || !Intent.ACTION_VIEW.equals(appLinkAction)) {
-            // not app link intent
-            return false;
+        if (Intent.ACTION_VIEW.equals(action) && data != null) {
+            String ticketId = data.getLastPathSegment();
+            subscribeToTicket(ticketId);
+            return true;
+        } else if (NfcAdapter.ACTION_NDEF_DISCOVERED.equals(action)) {
+            Parcelable[] rawMessages = intent.getParcelableArrayExtra(NfcAdapter.EXTRA_NDEF_MESSAGES);
+
+            if (rawMessages != null) {
+                for (Parcelable rawMessage : rawMessages) {
+                    NdefMessage message = (NdefMessage) rawMessage;
+
+                    for (NdefRecord record : message.getRecords()) {
+                        String payloadString = new String(record.getPayload());
+                        System.out.println("have record: " + payloadString);
+                    }
+                }
+            }
+            return true;
         }
 
-        String ticketId = appLinkData.getLastPathSegment();
-        subscribeToTicket(ticketId);
-        return true;
+        return false;
     }
 
     private void createDeleteBundle() {
