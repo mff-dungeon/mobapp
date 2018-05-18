@@ -1,5 +1,7 @@
 package cz.mff.mobapp.model;
 
+import android.content.ContentProviderOperation;
+
 import org.json.JSONObject;
 
 import java.util.UUID;
@@ -42,6 +44,11 @@ public final class Contact extends Bundle {
             if (c.getLabel() != null)
                 jsonObject.put(LABEL, c.getLastModified());
             jsonObject.put(IS_CONTACT, true);
+        }
+
+        @Override
+        public ContentProviderOperation.Builder storeToBuilder(Contact object, ContentProviderOperation.Builder builder) throws Exception {
+            throw new UnsupportedOperationException();
         }
 
         @Override

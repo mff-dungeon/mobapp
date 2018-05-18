@@ -80,7 +80,7 @@ public class ContactDetailActivity extends Activity implements AuthenticatedActi
                 new String[]{ContactsContract.RawContacts.SOURCE_ID,
                         Entity.DATA_ID, Entity.MIMETYPE, Entity.DATA1},
                 null, null, null);
-        ContactsContract.CommonDataKinds.StructuredName
+
         if (c != null) {
             showContact(contactId, c);
             c.close();

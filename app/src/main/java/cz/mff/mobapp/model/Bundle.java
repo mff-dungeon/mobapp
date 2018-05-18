@@ -1,5 +1,7 @@
 package cz.mff.mobapp.model;
 
+import android.content.ContentProviderOperation;
+
 import org.json.JSONObject;
 
 import java.util.Date;
@@ -30,7 +32,6 @@ public class Bundle implements Identifiable<UUID> {
         return isContact;
     }
 
-
     public static final SimpleEntityHandler<Bundle> handler = new SimpleEntityHandler<Bundle>(Bundle.class, Bundle::new) {
         @Override
         public void loadFromJSON(Bundle b, JSONObject jsonObject) throws Exception {
@@ -44,6 +45,11 @@ public class Bundle implements Identifiable<UUID> {
             jsonObject.put(ID, b.getId().toString());
             jsonObject.put(IS_CONTACT, b.isContact());
             jsonObject.put(LAST_MODIFIED, b.getLastModified());
+        }
+
+        @Override
+        public ContentProviderOperation.Builder storeToBuilder(Bundle object, ContentProviderOperation.Builder builder) throws Exception {
+            throw new UnsupportedOperationException();
         }
 
         @Override

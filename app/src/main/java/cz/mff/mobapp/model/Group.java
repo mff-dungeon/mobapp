@@ -1,5 +1,7 @@
 package cz.mff.mobapp.model;
 
+import android.content.ContentProviderOperation;
+
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -46,6 +48,11 @@ public final class Group extends Bundle {
             if (c.getLabel() != null)
                 jsonObject.put(LABEL, c.getLastModified());
             jsonObject.put(IS_CONTACT, false);
+        }
+
+        @Override
+        public ContentProviderOperation.Builder storeToBuilder(Group object, ContentProviderOperation.Builder builder) throws Exception {
+            throw new UnsupportedOperationException();
         }
 
         @Override
