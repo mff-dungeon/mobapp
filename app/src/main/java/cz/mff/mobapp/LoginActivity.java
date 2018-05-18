@@ -15,7 +15,12 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.TextView;
 
+import java.util.concurrent.Semaphore;
+
 import cz.mff.mobapp.auth.AccountUtils;
+import cz.mff.mobapp.auth.ServerAuthenticator;
+import cz.mff.mobapp.event.SyncTryCatch;
+import cz.mff.mobapp.event.TryCatch;
 
 public class LoginActivity extends AccountAuthenticatorActivity {
 
@@ -26,6 +31,7 @@ public class LoginActivity extends AccountAuthenticatorActivity {
 
     private AccountManager mAccountManager;
     private UserLoginTask mAuthTask = null;
+    private ServerAuthenticator serverAuthenticator;
 
     private String mEmail;
     private String mPassword;
@@ -42,6 +48,7 @@ public class LoginActivity extends AccountAuthenticatorActivity {
         setContentView(R.layout.activity_login);
 
         mAccountManager = AccountManager.get(this);
+        serverAuthenticator = new ServerAuthenticator(this);
 
         mEmail = getIntent().getStringExtra(AccountManager.KEY_ACCOUNT_NAME);
         mEmailView = findViewById(R.id.email);
@@ -92,11 +99,11 @@ public class LoginActivity extends AccountAuthenticatorActivity {
             mEmailView.setError(getString(R.string.error_field_required));
             focusView = mEmailView;
             cancel = true;
-        } else if (!mEmail.contains("@")) {
+        }/* FIXME else if (!mEmail.contains("@")) {
             mEmailView.setError(getString(R.string.error_invalid_email));
             focusView = mEmailView;
             cancel = true;
-        }
+        }*/
 
         if (cancel) {
             // There was an error; don't attempt login and focus the first
@@ -107,7 +114,7 @@ public class LoginActivity extends AccountAuthenticatorActivity {
             // perform the user login attempt.
             mLoginStatusMessageView.setText(R.string.login_progress_signing_in);
             showProgress(true);
-            mAuthTask = new UserLoginTask();
+            mAuthTask = new UserLoginTask(serverAuthenticator);
             mAuthTask.execute((Void) null);
         }
     }
@@ -149,15 +156,21 @@ public class LoginActivity extends AccountAuthenticatorActivity {
     }
 
     public class UserLoginTask extends AsyncTask<Void, Void, Intent> {
+        private ServerAuthenticator serverAuthenticator;
+
+        public UserLoginTask(ServerAuthenticator serverAuthenticator) {
+            this.serverAuthenticator = serverAuthenticator;
+        }
 
         @Override
         protected Intent doInBackground(Void... params) {
+            final SyncTryCatch<String> waitListener = new SyncTryCatch<>();
+            serverAuthenticator.retrieveToken(mEmail, mPassword, waitListener);
 
-            // TODO: attempt authentication against a network service.
-            String authToken = AccountUtils.mServerAuthenticator.signIn(mEmail, mPassword);
+            // block until the token is available
+            final String authToken = waitListener.getOrNull();
 
             final Intent res = new Intent();
-
             res.putExtra(AccountManager.KEY_ACCOUNT_NAME, mEmail);
             res.putExtra(AccountManager.KEY_ACCOUNT_TYPE, AccountUtils.ACCOUNT_TYPE);
             res.putExtra(AccountManager.KEY_AUTHTOKEN, authToken);

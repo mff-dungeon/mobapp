@@ -10,14 +10,17 @@ import android.content.Intent;
 import android.os.Bundle;
 
 import cz.mff.mobapp.LoginActivity;
+import cz.mff.mobapp.event.SyncTryCatch;
 
 public class AccountAuthenticator extends AbstractAccountAuthenticator {
 
     private final Context mContext;
+    private final ServerAuthenticator mServerAuthenticator;
 
     public AccountAuthenticator(Context context) {
         super(context);
         mContext = context;
+        mServerAuthenticator = new ServerAuthenticator(context);
     }
 
     @Override
@@ -73,7 +76,9 @@ public class AccountAuthenticator extends AbstractAccountAuthenticator {
             if (authToken.isEmpty()) {
                 final String password = am.getPassword(account);
                 if (password != null) {
-                    authToken = AccountUtils.mServerAuthenticator.signIn(account.name, password);
+                    SyncTryCatch<String> waitListener = new SyncTryCatch<>();
+                    mServerAuthenticator.retrieveToken(account.name, password, waitListener);
+                    authToken = waitListener.getOrNull();
                 }
             }
         }
