@@ -1,14 +1,38 @@
 package cz.mff.mobapp.sync;
 
 import android.accounts.Account;
+import android.accounts.AccountManager;
+import android.accounts.AccountManagerCallback;
+import android.accounts.AccountManagerFuture;
+import android.accounts.AuthenticatorException;
+import android.accounts.OperationCanceledException;
 import android.content.AbstractThreadedSyncAdapter;
+import android.content.ContentProvider;
 import android.content.ContentProviderClient;
 import android.content.ContentResolver;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SyncResult;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
+import android.util.Log;
+
+import java.io.IOException;
+import java.sql.Date;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.UUID;
+
+import cz.mff.mobapp.api.APIStorage;
+import cz.mff.mobapp.api.Requester;
+import cz.mff.mobapp.api.TokenAuthProvider;
+import cz.mff.mobapp.auth.AccountUtils;
+import cz.mff.mobapp.event.Listener;
+import cz.mff.mobapp.event.TryCatch;
+import cz.mff.mobapp.model.Contact;
+import cz.mff.mobapp.model.EntityHandler;
+import cz.mff.mobapp.model.Manager;
 
 import static android.provider.ContactsContract.RawContacts;
 
@@ -22,6 +46,8 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
             Contracts.LAST_MODIFIED,
     };
 
+    private static final String LOG_TAG = "SyncAdapter";
+
     public SyncAdapter(Context context, boolean autoInitialize) {
         super(context, autoInitialize);
     }
@@ -32,6 +58,52 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 
     @Override
     public void onPerformSync(Account account, Bundle bundle, String s, ContentProviderClient contentProviderClient, SyncResult syncResult) {
+        AccountManager accountManager = AccountManager.get(getContext());
+
+        accountManager.getAuthToken(account, AccountUtils.AUTH_TOKEN_TYPE, null, false, new AccountManagerCallback<Bundle>() {
+            @Override
+            public void run(AccountManagerFuture<Bundle> accountManagerFuture) {
+                Bundle resultBundle;
+                try {
+                    resultBundle = accountManagerFuture.getResult();
+                }
+                catch (AuthenticatorException | IOException | OperationCanceledException e) {
+                    Log.e(LOG_TAG, "Authentication failure.");
+                    return;
+                }
+
+                final Intent intent = (Intent) bundle.get(AccountManager.KEY_INTENT);
+                if (null != intent) {
+                    return;
+                }
+                String authToken = resultBundle.getString(AccountManager.KEY_AUTHTOKEN);
+                performSyncAuthenticated(account, authToken, bundle, s, contentProviderClient, syncResult);
+            }
+        }, null);
+    }
+
+    private void performSyncAuthenticated(Account account, String authToken, Bundle bundle, String s,
+                                          ContentProviderClient contentProviderClient,
+                                          SyncResult syncResult) {
+
+        final Requester requester = new Requester(new TokenAuthProvider(authToken));
+        Manager<Contact, UUID> contactManager = new Manager<>(
+                new APIStorage<>("contacts", requester, Contact.handler), Contact.handler);
+
+        contactManager.listAll(new Listener<ArrayList<Contact>>() {
+            @Override
+            public void doCatch(Exception data) {
+                Log.e(LOG_TAG, "Unable to fetch contact data from server.");
+            }
+
+            @Override
+            public void doTry(ArrayList<Contact> data) throws Exception {
+                processContacts(account, data);
+            }
+        });
+    }
+
+    private void processContacts(Account account, ArrayList<Contact> contacts) {
         final ContentResolver contentResolver = getContext().getContentResolver();
 
         Uri rawContactUri = RawContacts.CONTENT_URI.buildUpon()
@@ -39,24 +111,37 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                 .appendQueryParameter(RawContacts.ACCOUNT_TYPE, account.type)
                 .build();
 
-        Cursor cursor = contentResolver.query(rawContactUri, existingContactsProjection, null, null, null);
+        final Cursor cursor = contentResolver.query(rawContactUri, existingContactsProjection, null, null, null);
 
-        /*
-            TODO: read cursor and look for:
-                - known, updated contacts (source id filled, dirty = 1)
-                - new contacts (source id not filled)
-                - deleted contacts (deleted = 1)
+        if (cursor == null) {
+            Log.w(LOG_TAG, "No Cursor was obtained.");
+        }
 
-            TODO: fetch updated bundles from server
-               - find contacts added on server (no such field with source id == uuid)
-               - find contacts updated on server (last modified differs)
+        HashMap<String, Integer> cursorMapping = new HashMap<>();
 
-            TODO: resolve conflicts :)
+        while(cursor.moveToNext()) {
+            String sourceId = cursor.getString(0);
+            if (sourceId != null && !sourceId.equals("")) {
+                cursorMapping.put(sourceId, cursor.getPosition());
+            }
+        }
 
-            Documentation for columns + examples on:
-                https://developer.android.com/reference/android/provider/ContactsContract.RawContacts
+        for(Contact contact : contacts) {
+            String uuid = contact.getId().toString();
+            if(cursorMapping.containsKey(uuid)) {
+                cursor.moveToPosition(cursorMapping.get(uuid));
+                String lastModifiedStr = cursor.getString(4);
+                // FIXME: create date properly
+                Date lastModified = Date.valueOf(lastModifiedStr);
+                if (contact.getLastModified().after(lastModified)) {
+                    // TODO: contentResolver.update() on all required RawContact fields/Entities
+                }
+            }
+            else {
+                // TODO: contentResolver.insert() on all required RawContact fields/Entities
+            }
+        }
 
-          */
-
+        cursor.close();
     }
 }
