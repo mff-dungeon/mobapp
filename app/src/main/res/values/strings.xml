@@ -4,7 +4,7 @@
     <string name="title_activity_contact_detail">Contact Detail</string>
 
     <string name="contact_detail_id">Contact ID</string>
-    <string name="contact_detail_modified">Last modified</string>
+    <string name="last_modified">Last modified</string>
 
 
     <string name="large_text">
@@ -108,4 +108,6 @@
     <string name="contact_detail_label">Label</string>
     <string name="account_type">cz.mff.mobapp</string>
     <string name="login_prompt">To use MobApp, please sign in.</string>
+    <string name="group_detail_id">Group ID</string>
+    <string name="group_detail_label">Group label</string>
 </resources>

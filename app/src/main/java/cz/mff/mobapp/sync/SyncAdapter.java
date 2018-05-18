@@ -106,6 +106,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
     private void processContacts(Account account, ArrayList<Contact> contacts) {
         final ContentResolver contentResolver = getContext().getContentResolver();
 
+
         Uri rawContactUri = RawContacts.CONTENT_URI.buildUpon()
                 .appendQueryParameter(RawContacts.ACCOUNT_NAME, account.name)
                 .appendQueryParameter(RawContacts.ACCOUNT_TYPE, account.type)

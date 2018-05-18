@@ -53,6 +53,8 @@
 
         <activity android:name=".ShareTicketActivity" />
         <activity android:name=".LoginActivity" />
+        <activity android:name=".GroupsActivity" />
+        <activity android:name=".GroupDetailActivity" />
 
         <service
             android:name=".auth.AuthenticatorService">

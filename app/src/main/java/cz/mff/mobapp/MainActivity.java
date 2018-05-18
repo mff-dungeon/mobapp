@@ -58,6 +58,8 @@ public class MainActivity extends Activity implements ExceptionListener, Authent
         findViewById(R.id.bundleButton).setOnClickListener(view -> showBundlesActivity());
         findViewById(R.id.createDeleteButton).setOnClickListener(view -> createDeleteBundle());
         findViewById(R.id.shareTicketButton).setOnClickListener(view -> shareTicket("33319b2f-f891-40b0-a23f-bcdaa9b71857"));
+        findViewById(R.id.groupButton).setOnClickListener(view -> startActivity(new Intent(this, GroupsActivity.class)));
+
 
         ServiceLocator.create(this);
     }
@@ -69,7 +71,7 @@ public class MainActivity extends Activity implements ExceptionListener, Authent
 
     @Override
     public void onAuthenticated() {
-        manager = serviceLocator.createContactManager();
+        manager = serviceLocator.getContactAPIManager();
 
         boolean handled = tryHandleIntent(getIntent());
         if (!handled) {

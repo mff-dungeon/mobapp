@@ -29,7 +29,7 @@ public final class Contact extends Bundle {
         public void loadFromJSON(Contact c, JSONObject jsonObject) throws Exception {
             c.id = UUID.fromString(jsonObject.getString(ID));
             c.lastModified = Response.timeFormat.parse(jsonObject.getString(LAST_MODIFIED));
-            c.label = jsonObject.getString("label");
+            c.label = jsonObject.getString(LABEL);
             c.isContact = true;
         }
 
