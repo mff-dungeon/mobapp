@@ -1,5 +1,8 @@
 package cz.mff.mobapp.model.infos;
 
+import android.content.ContentProviderOperation.Builder;
+import android.provider.ContactsContract.CommonDataKinds.StructuredPostal;
+
 import org.json.JSONObject;
 
 import cz.mff.mobapp.model.ContactInfo;
@@ -26,6 +29,12 @@ public class Address implements ContactInfo {
         public void storeToJSON(Address object, JSONObject jsonObject) throws Exception {
             jsonObject.put(ADDRESS_CONTENT_KEY, object.address);
             jsonObject.put(ADDRESS_TYPE_KEY, object.type);
+        }
+
+        @Override
+        public Builder storeToBuilder(Address object, Builder builder) throws Exception {
+            return builder.withValue(StructuredPostal.FORMATTED_ADDRESS, object.address)
+                    .withValue(StructuredPostal.TYPE, object.type);
         }
 
         @Override

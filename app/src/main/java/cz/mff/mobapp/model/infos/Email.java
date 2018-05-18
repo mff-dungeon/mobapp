@@ -1,5 +1,9 @@
 package cz.mff.mobapp.model.infos;
 
+import android.content.ContentProviderOperation;
+import android.content.ContentProviderOperation.Builder;
+import android.provider.ContactsContract.CommonDataKinds;
+
 import org.json.JSONObject;
 
 import cz.mff.mobapp.model.ContactInfo;
@@ -30,6 +34,13 @@ public class Email implements ContactInfo {
             jsonObject.put(EMAIL_ADDRESS_KEY, object.address);
             jsonObject.put(EMAIL_TYPE_KEY, object.type);
             jsonObject.put(EMAIL_DISPLAY_NAME_KEY, object.displayName);
+        }
+
+        @Override
+        public Builder storeToBuilder(Email object, Builder builder) throws Exception {
+            return builder.withValue(CommonDataKinds.Email.ADDRESS, object.address)
+                    .withValue(CommonDataKinds.Email.TYPE, object.type)
+                    .withValue(CommonDataKinds.Email.DISPLAY_NAME, object.displayName);
         }
 
         @Override
