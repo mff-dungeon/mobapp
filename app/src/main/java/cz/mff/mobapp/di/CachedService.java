@@ -12,7 +12,7 @@ public final class CachedService<T> {
     }
 
     public T get() {
-        if (service != null)
+        if (service == null)
             service = factory.create();
 
         return service;

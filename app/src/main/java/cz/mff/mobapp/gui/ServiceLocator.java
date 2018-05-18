@@ -14,7 +14,6 @@ import cz.mff.mobapp.model.Manager;
 public class ServiceLocator {
 
     private Context activity;
-    private static final String DB_NAME = "test-database2";
 
     public ServiceLocator(Context activity) {
         this.activity = activity;
