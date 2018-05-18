@@ -20,15 +20,19 @@ import cz.mff.mobapp.model.Manager;
 public class ServiceLocator {
 
     private Activity activity;
-    private AccountSession accountSession;
 
     protected ServiceLocator(Activity activity) {
         this.activity = activity;
-        this.accountSession = new AccountSession(activity);
     }
 
-    public void ensureAuthenticated(Listener<Void> listener) {
-        accountSession.retrieveToken(new TryCatch<>(
+    private CachedService<AccountSession> accountSession = new CachedService<>(() -> new AccountSession(this.activity));
+
+    public AccountSession getAccountSession() {
+        return accountSession.get();
+    }
+
+    private void ensureAuthenticated(Listener<Void> listener) {
+        getAccountSession().retrieveToken(new TryCatch<>(
                 token -> {
                     getRequester().setDefaultAuthProvider(new TokenAuthProvider(token));
                     listener.doTry(null);

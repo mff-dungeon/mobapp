@@ -17,25 +17,33 @@ public class AccountSession {
 
     private Activity activity;
 
-    private AccountManager mAccountManager;
-    private AuthPreferences mAuthPreferences;
+    private AccountManager accountManager;
+    private AuthPreferences authPreferences;
+
+    private String accountName;
     private String authToken;
 
     public AccountSession(Activity activity) {
         this.activity = activity;
 
         this.authToken = null;
-        this.mAuthPreferences = new AuthPreferences(activity);
-        this.mAccountManager = AccountManager.get(activity);
+        this.accountName = null;
+
+        this.authPreferences = new AuthPreferences(activity);
+        this.accountManager = AccountManager.get(activity);
     }
 
     public void retrieveToken(Listener<String> tokenListener) {
-        this.mAccountManager.getAuthTokenByFeatures(AccountUtils.ACCOUNT_TYPE, AccountUtils.AUTH_TOKEN_TYPE,
+        this.accountManager.getAuthTokenByFeatures(AccountUtils.ACCOUNT_TYPE, AccountUtils.AUTH_TOKEN_TYPE,
                 null, activity, null, null, new GetAuthTokenCallback(tokenListener), null);
     }
 
     public String getAuthToken() {
         return authToken;
+    }
+
+    public String getAccountName() {
+        return accountName;
     }
 
     private class GetAuthTokenCallback implements AccountManagerCallback<Bundle> {
@@ -57,18 +65,18 @@ public class AccountSession {
                     activity.startActivityForResult(intent, REQ_SIGNUP);
                 } else {
                     authToken = bundle.getString(AccountManager.KEY_AUTHTOKEN);
-                    final String accountName = bundle.getString(AccountManager.KEY_ACCOUNT_NAME);
+                    accountName = bundle.getString(AccountManager.KEY_ACCOUNT_NAME);
 
                     // Save session username & auth token
-                    mAuthPreferences.setAuthToken(authToken);
-                    mAuthPreferences.setUsername(accountName);
+                    authPreferences.setAuthToken(authToken);
+                    authPreferences.setUsername(accountName);
 
                     // If the logged account didn't exist, we need to create it on the device
                     Account account = AccountUtils.getAccount(activity, accountName);
                     if (null == account) {
                         account = new Account(accountName, AccountUtils.ACCOUNT_TYPE);
-                        mAccountManager.addAccountExplicitly(account, bundle.getString(LoginActivity.PARAM_USER_PASSWORD), null);
-                        mAccountManager.setAuthToken(account, AccountUtils.AUTH_TOKEN_TYPE, authToken);
+                        accountManager.addAccountExplicitly(account, bundle.getString(LoginActivity.PARAM_USER_PASSWORD), null);
+                        accountManager.setAuthToken(account, AccountUtils.AUTH_TOKEN_TYPE, authToken);
                     }
 
                     tokenListener.doTry(authToken);

@@ -48,8 +48,6 @@ public class ContactsActivity extends Activity implements AuthenticatedActivity 
                     ContactsContract.Contacts.DISPLAY_NAME_PRIMARY
             };
 
-    public String accountName;
-
     private boolean authenticated = false;
 
     private ListView contactList;
@@ -78,6 +76,7 @@ public class ContactsActivity extends Activity implements AuthenticatedActivity 
     }
 
     private void loadContacts() {
+        final String accountName = serviceLocator.getAccountSession().getAccountName();
         final Cursor rawContacts = getContentResolver().query(ContactsContract.RawContacts.CONTENT_URI.buildUpon()
                         .appendQueryParameter(ContactsContract.RawContacts.ACCOUNT_TYPE, AccountUtils.ACCOUNT_TYPE)
                         .appendQueryParameter(ContactsContract.RawContacts.ACCOUNT_NAME, accountName)
@@ -156,7 +155,7 @@ public class ContactsActivity extends Activity implements AuthenticatedActivity 
     @Override
     public void onAuthenticated() {
         authenticated = true;
-        // FIXME: accountName = serviceLocator.getAccountName();
+
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_CONTACTS)
                 != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this,
