@@ -1,7 +1,11 @@
 package cz.mff.mobapp.model.infos;
 
+import android.content.ContentProviderOperation;
+import android.provider.ContactsContract;
+
 import org.json.JSONObject;
 
+import cz.mff.mobapp.model.Contact;
 import cz.mff.mobapp.model.ContactInfo;
 import cz.mff.mobapp.model.EntityHandler;
 import cz.mff.mobapp.model.EntityHandlerRepository;
@@ -12,8 +16,8 @@ public class InstantMessenger implements ContactInfo {
     private static final String IM_ID_KEY = "id";
     private static final String IM_PROTOCOL_KEY = "protocol";
 
-    private String id; // data1
-    private int protocol; // data5
+    private String id;
+    private int protocol;
 
     public static final EntityHandler<InstantMessenger> handler = new SimpleEntityHandler<InstantMessenger>(InstantMessenger.class, InstantMessenger::new) {
         @Override
@@ -26,6 +30,12 @@ public class InstantMessenger implements ContactInfo {
         public void storeToJSON(InstantMessenger object, JSONObject jsonObject) throws Exception {
             jsonObject.put(IM_ID_KEY, object.id);
             jsonObject.put(IM_PROTOCOL_KEY, object.protocol);
+        }
+
+        @Override
+        public ContentProviderOperation.Builder storeToBuilder(InstantMessenger object, ContentProviderOperation.Builder builder) throws Exception {
+            return builder.withValue(ContactsContract.CommonDataKinds.Im.DATA, object.id)
+                    .withValue(ContactsContract.CommonDataKinds.Im.PROTOCOL, object.protocol);
         }
 
         @Override

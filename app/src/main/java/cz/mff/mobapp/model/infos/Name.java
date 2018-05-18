@@ -19,12 +19,12 @@ public class Name implements ContactInfo {
     private static final String NAME_MIDDLE_KEY = "middle";
     private static final String NAME_SUFFIX_KEY = "suffix";
 
-    private String displayName; // data1
-    private String givenName; // data2
-    private String familyName; // data3
-    private String prefix; // data4
-    private String middleName; // data5
-    private String suffix; // data6
+    private String displayName;
+    private String givenName;
+    private String familyName;
+    private String prefix;
+    private String middleName;
+    private String suffix;
 
     public static final EntityHandler<Name> handler = new SimpleEntityHandler<Name>(Name.class, Name::new) {
         @Override
@@ -50,7 +50,11 @@ public class Name implements ContactInfo {
         @Override
         public ContentProviderOperation.Builder storeToBuilder(Name object, ContentProviderOperation.Builder builder) throws Exception {
             return builder.withValue(StructuredName.DISPLAY_NAME, object.displayName)
-                    /* FIXME */;
+                    .withValue(StructuredName.GIVEN_NAME, object.givenName)
+                    .withValue(StructuredName.FAMILY_NAME, object.familyName)
+                    .withValue(StructuredName.PREFIX, object.prefix)
+                    .withValue(StructuredName.MIDDLE_NAME, object.middleName)
+                    .withValue(StructuredName.SUFFIX, object.suffix);
         }
 
         @Override

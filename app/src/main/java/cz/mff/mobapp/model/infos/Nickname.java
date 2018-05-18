@@ -1,5 +1,8 @@
 package cz.mff.mobapp.model.infos;
 
+import android.content.ContentProviderOperation;
+import android.provider.ContactsContract;
+
 import org.json.JSONObject;
 
 import cz.mff.mobapp.model.ContactInfo;
@@ -11,7 +14,7 @@ public class Nickname implements ContactInfo {
 
     private static final String NICKNAME_KEY = "nick";
 
-    private String nickname; // data1
+    private String nickname;
 
     public static final EntityHandler<Nickname> handler = new SimpleEntityHandler<Nickname>(Nickname.class, Nickname::new) {
         @Override
@@ -22,6 +25,11 @@ public class Nickname implements ContactInfo {
         @Override
         public void storeToJSON(Nickname object, JSONObject jsonObject) throws Exception {
             jsonObject.put(NICKNAME_KEY, object.nickname);
+        }
+
+        @Override
+        public ContentProviderOperation.Builder storeToBuilder(Nickname object, ContentProviderOperation.Builder builder) throws Exception {
+            return builder.withValue(ContactsContract.CommonDataKinds.Nickname.NAME, object.nickname);
         }
 
         @Override

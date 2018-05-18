@@ -1,5 +1,8 @@
 package cz.mff.mobapp.model.infos;
 
+import android.content.ContentProviderOperation;
+import android.provider.ContactsContract;
+
 import org.json.JSONObject;
 
 import cz.mff.mobapp.model.ContactInfo;
@@ -12,8 +15,8 @@ public class Identity implements ContactInfo {
     private static final String IDENTITY_NUMBER_KEY = "number";
     private static final String IDENTITY_NAMESPACE_KEY = "namespace";
 
-    private String number; // data1
-    private String namespace; // data2
+    private String number;
+    private String namespace;
 
     public static final EntityHandler<Identity> handler = new SimpleEntityHandler<Identity>(Identity.class, Identity::new) {
         @Override
@@ -26,6 +29,12 @@ public class Identity implements ContactInfo {
         public void storeToJSON(Identity object, JSONObject jsonObject) throws Exception {
             jsonObject.put(IDENTITY_NUMBER_KEY, object.number);
             jsonObject.put(IDENTITY_NAMESPACE_KEY, object.namespace);
+        }
+
+        @Override
+        public ContentProviderOperation.Builder storeToBuilder(Identity object, ContentProviderOperation.Builder builder) throws Exception {
+            return builder.withValue(ContactsContract.CommonDataKinds.Identity.IDENTITY, object.number)
+                    .withValue(ContactsContract.CommonDataKinds.Identity.NAMESPACE, object.namespace);
         }
 
         @Override
