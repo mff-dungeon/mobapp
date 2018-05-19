@@ -1,0 +1,13 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context=".StartActivity">
+
+    <item
+        android:id="@+id/action_ticket"
+        android:icon="@drawable/share_white"
+        android:orderInCategory="50"
+        android:title="@string/action_share_ticket"
+        app:showAsAction="ifRoom" />
+
+</menu>

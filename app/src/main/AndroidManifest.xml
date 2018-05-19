@@ -29,7 +29,7 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
             <intent-filter>
-                <action android:name="android.nfc.action.NDEF_DISCOVERED"/>
+                <action android:name="android.nfc.action.NDEF_DISCOVERED" />
                 <action android:name="android.intent.action.VIEW" />
 
                 <category android:name="android.intent.category.DEFAULT" />
@@ -41,6 +41,7 @@
                     android:scheme="http" />
             </intent-filter>
         </activity>
+
         <activity
             android:name=".ContactsActivity"
             android:label="@string/title_activity_contacts" />
@@ -48,17 +49,31 @@
             android:name=".ContactDetailActivity"
             android:label="@string/title_activity_contact_detail" />
 
+        <activity android:name=".ShareTicketActivity"
+            android:label="@string/title_activity_share_contact"/>
+
+        <activity android:name=".LoginActivity" />
+
+        <activity android:name=".GroupsActivity" />
+
+        <activity android:name=".GroupDetailActivity"
+            android:label="@string/title_activity_group_detail" />
+
+        <activity
+            android:name=".StartActivity"
+            android:label="@string/title_activity_start">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
         <service
             android:name=".service.UpdateService"
             android:exported="false" />
 
-        <activity android:name=".ShareTicketActivity" />
-        <activity android:name=".LoginActivity" />
-        <activity android:name=".GroupsActivity" />
-        <activity android:name=".GroupDetailActivity" />
-
-        <service
-            android:name=".auth.AuthenticatorService">
+        <service android:name=".auth.AuthenticatorService">
             <intent-filter>
                 <action android:name="android.accounts.AccountAuthenticator" />
             </intent-filter>
@@ -67,15 +82,16 @@
                 android:name="android.accounts.AccountAuthenticator"
                 android:resource="@xml/authenticator" />
         </service>
-
         <service
-            android:name="cz.mff.mobapp.sync.SyncService"
+            android:name=".sync.SyncService"
             android:exported="true"
             android:process=":sync">
             <intent-filter>
-                <action android:name="android.content.SyncAdapter"/>
+                <action android:name="android.content.SyncAdapter" />
             </intent-filter>
-            <meta-data android:name="android.content.SyncAdapter"
+
+            <meta-data
+                android:name="android.content.SyncAdapter"
                 android:resource="@xml/syncadapter" />
         </service>
     </application>
