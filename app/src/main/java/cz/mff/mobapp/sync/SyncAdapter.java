@@ -136,7 +136,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                 long rowId = cursor.getLong(0);
                 String lastModifiedStr = cursor.getString(2);
 
-                if (!contact.getLastModified().toString().equals(lastModifiedStr)) {
+                if (contact.getLastModified().toString().equals(lastModifiedStr)) {
                     Log.v(LOG_TAG, contact.getLabel() + " up-to-date...");
                     continue;
                 }

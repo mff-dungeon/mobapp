@@ -51,6 +51,12 @@ public class Email implements ContactInfo {
         }
     };
 
+    public Email() {}
+
+    public Email(String email) {
+        this.address = email;
+    }
+
     public static void register(EntityHandlerRepository<ContactInfo> repo) {
         repo.register(handler);
     }
@@ -58,5 +64,9 @@ public class Email implements ContactInfo {
     @Override
     public EntityHandler getHandler() {
         return handler;
+    }
+
+    public String getAddress() {
+        return address;
     }
 }

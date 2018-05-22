@@ -16,7 +16,7 @@ public final class Contact extends Bundle {
 
     private String label;
 
-    private ArrayList<ContactInfo> contactInfos;
+    private final ArrayList<ContactInfo> contactInfos = new ArrayList<>();
 
     @Override
     public Boolean isContact() {
@@ -43,7 +43,7 @@ public final class Contact extends Bundle {
             c.isContact = true;
 
             EntityHandlerRepository<ContactInfo> repo = ContactInfoHandlerRepository.get();
-            c.contactInfos = new ArrayList<>();
+            c.contactInfos.clear();
             JSONArray arr = jsonObject.getJSONArray(INFORMATION);
             for (int i = 0; i < arr.length(); i++) {
                 JSONObject jsonCI = arr.getJSONObject(i);
@@ -63,8 +63,22 @@ public final class Contact extends Bundle {
             if (c.getLastModified() != null)
                 jsonObject.put(LAST_MODIFIED, c.getLastModified());
             if (c.getLabel() != null)
-                jsonObject.put(LABEL, c.getLastModified());
+                jsonObject.put(LABEL, c.getLabel());
             jsonObject.put(IS_CONTACT, true);
+
+            JSONArray arr = new JSONArray();
+            for (ContactInfo ci : c.getContactInfos()) {
+                JSONObject data = new JSONObject();
+                ci.getHandler().storeToJSON(ci, data);
+
+                JSONObject jsonCI = new JSONObject();
+                jsonCI.put(ContactInfo.TYPE, ci.getHandler().getType());
+                jsonCI.put(ContactInfo.VERSION, ci.getHandler().getVersion());
+                jsonCI.put(ContactInfo.DATA, data);
+
+                arr.put(jsonCI);
+            }
+            jsonObject.put(INFORMATION, arr);
         }
 
         @Override

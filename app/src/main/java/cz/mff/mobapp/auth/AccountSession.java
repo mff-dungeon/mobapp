@@ -22,6 +22,7 @@ public class AccountSession {
 
     private String accountName;
     private String authToken;
+    private Account account;
 
     public AccountSession(Activity activity) {
         this.activity = activity;
@@ -72,7 +73,7 @@ public class AccountSession {
                     authPreferences.setUsername(accountName);
 
                     // If the logged account didn't exist, we need to create it on the device
-                    Account account = AccountUtils.getAccount(activity, accountName);
+                    account = AccountUtils.getAccount(activity, accountName);
                     if (null == account) {
                         account = new Account(accountName, AccountUtils.ACCOUNT_TYPE);
                         accountManager.addAccountExplicitly(account, bundle.getString(LoginActivity.PARAM_USER_PASSWORD), null);
@@ -87,5 +88,7 @@ public class AccountSession {
         }
     }
 
-
+    public Account getAccount() {
+        return account;
+    }
 }

@@ -141,7 +141,7 @@ public class ContactsFragment extends Fragment {
                 view.findViewById(R.id.item_text)
                         .setOnClickListener(l -> startContactActivity(entry, ContactDetailActivity.class));
                 view.findViewById(R.id.btn_edit)
-                        .setOnClickListener(l -> startContactActivity(entry, ContactDetailActivity.class)); // TODO: edit activity
+                        .setOnClickListener(l -> startContactActivity(entry, ContactEditActivity.class));
                 view.findViewById(R.id.btn_share)
                         .setOnClickListener(l -> startContactActivity(entry, ShareBundleActivity.class));
 

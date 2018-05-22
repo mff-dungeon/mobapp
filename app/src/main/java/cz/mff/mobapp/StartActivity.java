@@ -123,22 +123,27 @@ public class StartActivity extends Activity implements ActionBar.TabListener, Au
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
+        Intent intent;
 
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_ticket) {
-            Intent intent = new Intent(this, ShareTicketActivity.class);
+        switch (item.getItemId()) {
+            case R.id.action_ticket:
+                intent = new Intent(this, ShareTicketActivity.class);
 
-            //TODO: replace with real ticket
-            final String ticketId = "33319b2f-f891-40b0-a23f-bcdaa9b71857";
-            intent.putExtra(ShareTicketActivity.TICKET_ID, ticketId);
-            startActivity(intent);
+                //TODO: replace with real ticket
+                final String ticketId = "33319b2f-f891-40b0-a23f-bcdaa9b71857";
+                intent.putExtra(ShareTicketActivity.TICKET_ID, ticketId);
+                startActivity(intent);
+                return true;
+
+            case R.id.action_new_contact:
+                intent = new Intent(this, ContactEditActivity.class);
+                intent.putExtra(ContactEditActivity.PARAM_NEW, true);
+                startActivity(intent);
+                return true;
+
+            default:
+                return super.onOptionsItemSelected(item);
         }
-
-        return super.onOptionsItemSelected(item);
     }
 
     @Override

@@ -69,6 +69,14 @@ public class Name implements ContactInfo {
         }
     };
 
+    public Name() {
+    }
+
+    public Name(String name) {
+        this.displayName = name;
+        this.familyName = name; // TODO: Enough for the demo LOL.
+    }
+
     public static void register(EntityHandlerRepository<ContactInfo> repo) {
         repo.register(handler);
     }
@@ -76,5 +84,9 @@ public class Name implements ContactInfo {
     @Override
     public EntityHandler getHandler() {
         return handler;
+    }
+
+    public String getDisplayName() {
+        return displayName;
     }
 }

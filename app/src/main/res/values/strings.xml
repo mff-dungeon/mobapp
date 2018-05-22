@@ -120,4 +120,5 @@
     <string name="section_format">Hello World from section: %1$d</string>
     <string name="start_activity">Waiting for authentication</string>
     <string name="action_share_ticket">Share My Contact</string>
+    <string name="create_new_contact">Create new contact</string>
 </resources>

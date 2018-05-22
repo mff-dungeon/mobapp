@@ -46,6 +46,12 @@ public class Phone implements ContactInfo {
         }
     };
 
+    public Phone() {}
+
+    public Phone(String phone) {
+       this.number = phone;
+    }
+
     public static void register(EntityHandlerRepository<ContactInfo> repo) {
         repo.register(handler);
     }
@@ -53,5 +59,9 @@ public class Phone implements ContactInfo {
     @Override
     public EntityHandler getHandler() {
         return handler;
+    }
+
+    public String getNumber() {
+        return number;
     }
 }

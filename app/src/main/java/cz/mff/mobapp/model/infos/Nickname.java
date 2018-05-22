@@ -39,6 +39,12 @@ public class Nickname implements ContactInfo {
         }
     };
 
+    public Nickname() {}
+
+    public Nickname(String nickname) {
+        this.nickname = nickname;
+    }
+
     public static void register(EntityHandlerRepository<ContactInfo> repo) {
         repo.register(handler);
     }
@@ -46,5 +52,9 @@ public class Nickname implements ContactInfo {
     @Override
     public EntityHandler getHandler() {
         return handler;
+    }
+
+    public String getNickname() {
+        return nickname;
     }
 }
