@@ -13,7 +13,6 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ListAdapter;
 import android.widget.ListView;
-import android.widget.TextView;
 
 import java.util.ArrayList;
 import java.util.UUID;
@@ -48,7 +47,6 @@ public class GroupFragment extends Fragment {
                 R.layout.fragment_groups, container, false);
 
         groupList = rootView.findViewById(R.id.fragment_group_list);
-        groupList.setOnItemClickListener((adapterView, view, position, row) -> showGroupDetail(groups.get(position).getId()));
         groupList.setEmptyView(rootView.findViewById(R.id.fragment_group_list_empty));
 
         final Manager<Group, UUID> manager = serviceLocator.getGroupAPIManager();
@@ -61,30 +59,31 @@ public class GroupFragment extends Fragment {
 
         this.groups = groups;
 
-        adapter = new ArrayAdapter<Group>(context,
-                android.R.layout.simple_list_item_1, groups) {
+        adapter = new ArrayAdapter<Group>(context, R.layout.list_item_share_edit, R.id.item_text, groups) {
             @NonNull
             @Override
             public View getView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {
-                if (convertView == null) {
-                    convertView = LayoutInflater.from(context)
-                            .inflate(R.layout.contact_list_item, parent, false);
-                }
-                ((TextView) convertView.findViewById(R.id.contact_list_text))
-                        .setText(groups.get(position).getLabel());
-                return convertView;
+                View view = super.getView(position, convertView, parent);
+                Group entry = groups.get(position);
+
+                view.findViewById(R.id.item_text)
+                        .setOnClickListener(l -> startGroupActivity(entry, GroupDetailActivity.class));
+                view.findViewById(R.id.btn_edit)
+                        .setOnClickListener(l -> startGroupActivity(entry, GroupDetailActivity.class)); // TODO: edit activity
+                view.findViewById(R.id.btn_share)
+                        .setOnClickListener(l -> startGroupActivity(entry, ShareBundleActivity.class));
+                return view;
             }
         };
 
         groupList.setAdapter(adapter);
     }
 
-    private void showGroupDetail(UUID id) {
-        Intent intent = new Intent(context, GroupDetailActivity.class);
-        intent.putExtra("id", id);
+    private void startGroupActivity(Group group, Class<?> activityClass) {
+        Intent intent = new Intent(context, activityClass);
+        intent.putExtra("uuid", group.getId());
         startActivity(intent);
     }
-
 
     @Override
     public void onStart() {

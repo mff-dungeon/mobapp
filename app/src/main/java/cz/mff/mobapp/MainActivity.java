@@ -41,11 +41,6 @@ public class MainActivity extends Activity implements ExceptionListener, Authent
                 }, this));
     }
 
-    private void showBundlesActivity() {
-        Intent intent = new Intent(this, ContactsActivity.class);
-        startActivity(intent);
-    }
-
     @Override
     protected void onCreate(android.os.Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -55,10 +50,8 @@ public class MainActivity extends Activity implements ExceptionListener, Authent
         findViewById(R.id.requestButton).setOnClickListener(view -> sendRequest());
         findViewById(R.id.retrieveButton).setOnClickListener(view -> retrieveBundle());
         findViewById(R.id.updateButton).setOnClickListener(view -> updateBundle());
-        findViewById(R.id.bundleButton).setOnClickListener(view -> showBundlesActivity());
         findViewById(R.id.createDeleteButton).setOnClickListener(view -> createDeleteBundle());
         findViewById(R.id.shareTicketButton).setOnClickListener(view -> shareTicket("33319b2f-f891-40b0-a23f-bcdaa9b71857"));
-        findViewById(R.id.groupButton).setOnClickListener(view -> startActivity(new Intent(this, GroupsActivity.class)));
 
 
         ServiceLocator.create(this);

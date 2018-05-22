@@ -6,7 +6,6 @@ import android.content.Context;
 import java.util.UUID;
 
 import cz.mff.mobapp.AuthenticatedActivity;
-import cz.mff.mobapp.ContactsActivity;
 import cz.mff.mobapp.api.APIStorage;
 import cz.mff.mobapp.api.Requester;
 import cz.mff.mobapp.api.TokenAuthProvider;

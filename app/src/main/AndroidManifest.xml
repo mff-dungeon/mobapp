@@ -43,9 +43,6 @@
         </activity>
 
         <activity
-            android:name=".ContactsActivity"
-            android:label="@string/title_activity_contacts" />
-        <activity
             android:name=".ContactDetailActivity"
             android:label="@string/title_activity_contact_detail" />
 
@@ -53,8 +50,6 @@
             android:label="@string/title_activity_share_contact"/>
 
         <activity android:name=".LoginActivity" />
-
-        <activity android:name=".GroupsActivity" />
 
         <activity android:name=".GroupDetailActivity"
             android:label="@string/title_activity_group_detail" />
@@ -68,6 +63,8 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity android:name=".ShareBundleActivity"
+            android:noHistory="true" />
 
         <service
             android:name=".service.UpdateService"
@@ -82,6 +79,7 @@
                 android:name="android.accounts.AccountAuthenticator"
                 android:resource="@xml/authenticator" />
         </service>
+
         <service
             android:name=".sync.SyncService"
             android:exported="true"

@@ -14,25 +14,33 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
-import android.widget.ListAdapter;
 import android.widget.ListView;
-import android.widget.TextView;
+import android.widget.Toast;
 
 import java.util.ArrayList;
-import java.util.HashSet;
+import java.util.HashMap;
+import java.util.UUID;
 
 import cz.mff.mobapp.auth.AccountUtils;
 import cz.mff.mobapp.gui.ServiceLocator;
 
 public class ContactsFragment extends Fragment {
 
+
     private class ContactEntry {
         final long id;
         final String name;
+        final UUID uuid;
 
-        ContactEntry (long id, String name) {
+        ContactEntry(long id, String name, UUID uuid) {
             this.id = id;
             this.name = name;
+            this.uuid = uuid;
+        }
+
+        @Override
+        public String toString() {
+            return name;
         }
     }
 
@@ -43,9 +51,7 @@ public class ContactsFragment extends Fragment {
     private ViewGroup rootView;
 
     private ListView contactList;
-    private ListAdapter adapter;
 
-    private HashSet<Long> contactIds;
     private ArrayList<ContactEntry> entries;
 
     void initialize(Context context, ServiceLocator serviceLocator, ContentResolver contentResolver) {
@@ -57,16 +63,9 @@ public class ContactsFragment extends Fragment {
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, Bundle savedInstanceState) {
-        rootView = (ViewGroup) inflater.inflate(
-                R.layout.fragment_contacts, container, false);
-
+        rootView = (ViewGroup) inflater.inflate(R.layout.fragment_contacts, container, false);
 
         contactList = rootView.findViewById(R.id.fragment_contact_list);
-        contactList.setOnItemClickListener((adapterView, view, position, row) -> {
-            long contactId = entries.get(position).id;
-            showContactDetail(contactId);
-        });
-
         contactList.setEmptyView(rootView.findViewById(R.id.fragment_contact_list_empty));
 
         loadContacts();
@@ -79,11 +78,22 @@ public class ContactsFragment extends Fragment {
         super.onStart();
     }
 
-    private void showContactDetail(long contactId) {
-        Intent intent = new Intent(context, ContactDetailActivity.class);
-        intent.putExtra("id", contactId);
+    private void startContactActivity(ContactEntry entry, Class<?> activityClass) {
+        Intent intent = new Intent(context, activityClass);
+        intent.putExtra("id", entry.id);
+        intent.putExtra("uuid", entry.uuid);
         startActivity(intent);
     }
+
+    public static final String[] RAW_PROJECTION = {
+            ContactsContract.RawContacts.CONTACT_ID,
+            ContactsContract.RawContacts.SOURCE_ID,
+    };
+
+    public static final String[] CONTACTS_PROJECTION = {
+            ContactsContract.Contacts._ID,
+            ContactsContract.Contacts.DISPLAY_NAME_PRIMARY
+    };
 
     private void loadContacts() {
         final String accountName = serviceLocator.getAccountSession().getAccountName();
@@ -91,43 +101,51 @@ public class ContactsFragment extends Fragment {
                         .appendQueryParameter(ContactsContract.RawContacts.ACCOUNT_TYPE, AccountUtils.ACCOUNT_TYPE)
                         .appendQueryParameter(ContactsContract.RawContacts.ACCOUNT_NAME, accountName)
                         .build(),
-                new String[] {ContactsContract.RawContacts.CONTACT_ID},
+                RAW_PROJECTION,
                 null, null, null);
 
-        contactIds = new HashSet<>();
+        HashMap<Long, String> contactIds = new HashMap<>();
         entries = new ArrayList<>();
         while (rawContacts.moveToNext()) {
-            contactIds.add(rawContacts.getLong(0));
+            contactIds.put(rawContacts.getLong(0), rawContacts.getString(1));
         }
 
+        rawContacts.close();
+
         final Cursor contacts = contentResolver.query(ContactsContract.Contacts.CONTENT_URI,
-                new String[] {ContactsContract.Contacts._ID, ContactsContract.Contacts.DISPLAY_NAME_PRIMARY},
+                CONTACTS_PROJECTION,
                 null, null, ContactsContract.Contacts.DISPLAY_NAME_PRIMARY + " ASC");
 
         while (contacts.moveToNext()) {
             long id = contacts.getLong(0);
-            if (!contactIds.contains(id)) {
+            String uuid = contactIds.get(id);
+            if (uuid == null) {
                 Log.v("ContactsFragment", "Filtering contact " + contacts.getString(1));
                 continue;
             }
-            ContactEntry entry = new ContactEntry(id, contacts.getString(1));
+            ContactEntry entry = new ContactEntry(id, contacts.getString(1), UUID.fromString(uuid));
             entries.add(entry);
         }
 
+        contacts.close();
+
         if (entries.isEmpty()) return;
 
-        adapter = new ArrayAdapter<ContactEntry>(context,
-                android.R.layout.simple_list_item_1, entries) {
+        final ArrayAdapter<ContactEntry> adapter = new ArrayAdapter<ContactEntry>(context, R.layout.list_item_share_edit, R.id.item_text, entries) {
             @NonNull
             @Override
             public View getView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {
-                if (convertView == null) {
-                    convertView = LayoutInflater.from(context)
-                            .inflate(R.layout.contact_list_item, parent, false);
-                }
-                ((TextView) convertView.findViewById(R.id.contact_list_text))
-                        .setText(entries.get(position).name);
-                return convertView;
+                View view = super.getView(position, convertView, parent);
+                ContactEntry entry = entries.get(position);
+
+                view.findViewById(R.id.item_text)
+                        .setOnClickListener(l -> startContactActivity(entry, ContactDetailActivity.class));
+                view.findViewById(R.id.btn_edit)
+                        .setOnClickListener(l -> startContactActivity(entry, ContactDetailActivity.class)); // TODO: edit activity
+                view.findViewById(R.id.btn_share)
+                        .setOnClickListener(l -> startContactActivity(entry, ShareBundleActivity.class));
+
+                return view;
             }
         };
 

@@ -14,14 +14,14 @@ import cz.mff.mobapp.model.Manager;
 public class GroupDetailActivity extends Activity implements AuthenticatedActivity {
 
     private ServiceLocator serviceLocator;
-    private UUID id;
+    private UUID uuid;
 
     @Override
     protected void onCreate(android.os.Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_group_detail);
 
-        id = (UUID) getIntent().getSerializableExtra("id");
+        uuid = (UUID) getIntent().getSerializableExtra("uuid");
 
         ServiceLocator.create(this);
     }
@@ -34,7 +34,7 @@ public class GroupDetailActivity extends Activity implements AuthenticatedActivi
     private void loadGroup() {
         final Manager<Group, UUID> manager = serviceLocator.getGroupAPIManager();
 
-        manager.retrieve(id, new TryCatch<>(this::showGroup, Throwable::printStackTrace));
+        manager.retrieve(uuid, new TryCatch<>(this::showGroup, Throwable::printStackTrace));
     }
 
     private void showGroup(Group group) {

@@ -73,4 +73,9 @@ public final class Group extends Bundle {
     public ArrayList<Bundle> getInnerBundles() {
         return innerBundles;
     }
+
+    @Override
+    public String toString() {
+        return label;
+    }
 }
