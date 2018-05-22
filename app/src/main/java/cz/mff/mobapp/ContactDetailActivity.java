@@ -12,97 +12,52 @@ import android.widget.TextView;
 import android.provider.ContactsContract.Data;
 import android.widget.Toast;
 
+import java.util.UUID;
+
 import cz.mff.mobapp.auth.AccountUtils;
+import cz.mff.mobapp.event.TryCatch;
 import cz.mff.mobapp.gui.ServiceLocator;
+import cz.mff.mobapp.model.Contact;
+import cz.mff.mobapp.model.ContactInfo;
+import cz.mff.mobapp.model.Manager;
 
 public class ContactDetailActivity extends Activity implements AuthenticatedActivity {
 
-    private ServiceLocator serviceLocator;
-
-    private long contactId;
-
-    private static final String[] PROJECTION =
-            {
-                    Data._ID,
-                    Data.MIMETYPE,
-                    Data.DATA1,
-                    Data.DATA2,
-                    Data.DATA3,
-                    Data.DATA4,
-                    Data.DATA5,
-                    Data.DATA6,
-                    Data.DATA7,
-                    Data.DATA8,
-                    Data.DATA9,
-                    Data.DATA10,
-                    Data.DATA11,
-                    Data.DATA12,
-                    Data.DATA13,
-                    Data.DATA14,
-                    Data.DATA15
-            };
+    private Manager<Contact, UUID> contactManager;
+    private UUID contactId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_contact_detail);
 
-        contactId = getIntent().getLongExtra("id", -1);
+        contactId = (UUID) getIntent().getSerializableExtra("uuid");
 
         ServiceLocator.create(this);
     }
 
     @Override
+    public void onAuthenticated() {
+        contactManager.retrieve(contactId, new TryCatch<Contact>(this::showContact, this::handleError));
+    }
+
+    private void showContact(Contact contact) {
+        ((TextView) findViewById(R.id.contact_detail_id_value)).setText(String.valueOf(contactId));
+
+        StringBuilder info = new StringBuilder();
+        for (ContactInfo ci : contact.getContactInfos()) {
+            info.append(ci.getHandler().getType())
+                    .append(": ")
+                    .append(ci.toString())
+                    .append("\n");
+        }
+
+        ((TextView) findViewById(R.id.contact_detail_label)).setText(info.toString());
+    }
+
+    @Override
     protected void onStart() {
         super.onStart();
-    }
-
-    private void loadContact() {
-        final String accountName = serviceLocator.getAccountSession().getAccountName();
-        Cursor rawContact = getContentResolver().query(RawContacts.CONTENT_URI.buildUpon()
-                        .appendQueryParameter(RawContacts.ACCOUNT_TYPE, AccountUtils.ACCOUNT_TYPE)
-                        .appendQueryParameter(RawContacts.ACCOUNT_NAME, accountName)
-                        .build(),
-                new String[] {RawContacts._ID, RawContacts.CONTACT_ID, RawContacts.SOURCE_ID},
-                RawContacts.CONTACT_ID + " = ?", new String[] { String.valueOf(contactId)},
-                null);
-
-        if(rawContact == null || !rawContact.moveToNext()) {
-            Toast.makeText(this, "Contact retrieval failed.", Toast.LENGTH_SHORT). show();
-            return;
-        }
-        long id = rawContact.getLong(0);
-        rawContact.close();
-
-        Cursor c = getContentResolver().query(
-                Uri.withAppendedPath(ContentUris.withAppendedId(RawContacts.CONTENT_URI, id),
-                        Entity.CONTENT_DIRECTORY),
-                new String[]{ContactsContract.RawContacts.SOURCE_ID,
-                        Entity.DATA_ID, Entity.MIMETYPE, Entity.DATA1},
-                null, null, null);
-
-        if (c != null) {
-            showContact(contactId, c);
-            c.close();
-        }
-        else {
-            Toast.makeText(this, "Contact retrieval failed.", Toast.LENGTH_SHORT). show();
-        }
-    }
-
-    private void showContact(long contactId, Cursor cursor) {
-        ((TextView) findViewById(R.id.contact_detail_id_value)).setText(String.valueOf(contactId));
-        String info = "";
-        while (cursor.moveToNext()) {
-            if (!cursor.isNull(1)) {
-                String mimeType = cursor.getString(2);
-                String data = cursor.getString(3);
-                info += mimeType + ", " + data;
-            }
-            info += "\n";
-        }
-
-        ((TextView) findViewById(R.id.contact_detail_label)).setText(info);
     }
 
     @Override
@@ -111,12 +66,13 @@ public class ContactDetailActivity extends Activity implements AuthenticatedActi
     }
 
     @Override
-    public void onAuthenticated() {
-        loadContact();
+    public void setServiceLocator(ServiceLocator serviceLocator) {
+        contactManager = serviceLocator.getContactAPIManager();
     }
 
-    @Override
-    public void setServiceLocator(ServiceLocator serviceLocator) {
-        this.serviceLocator = serviceLocator;
+    private void handleError(Exception e) {
+        e.printStackTrace();
+        Toast.makeText(this, "Error: " + e.getMessage(), Toast.LENGTH_LONG).show();
+        finish();
     }
 }

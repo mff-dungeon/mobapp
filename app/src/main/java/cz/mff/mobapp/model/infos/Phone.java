@@ -64,4 +64,9 @@ public class Phone implements ContactInfo {
     public String getNumber() {
         return number;
     }
+
+    @Override
+    public String toString() {
+        return number;
+    }
 }

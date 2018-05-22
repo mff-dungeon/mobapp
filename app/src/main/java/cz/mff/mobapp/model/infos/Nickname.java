@@ -57,4 +57,9 @@ public class Nickname implements ContactInfo {
     public String getNickname() {
         return nickname;
     }
+
+    @Override
+    public String toString() {
+        return nickname;
+    }
 }

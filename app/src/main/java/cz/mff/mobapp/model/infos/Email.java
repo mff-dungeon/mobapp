@@ -69,4 +69,9 @@ public class Email implements ContactInfo {
     public String getAddress() {
         return address;
     }
+
+    @Override
+    public String toString() {
+        return address;
+    }
 }

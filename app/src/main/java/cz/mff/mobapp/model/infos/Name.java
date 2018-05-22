@@ -89,4 +89,9 @@ public class Name implements ContactInfo {
     public String getDisplayName() {
         return displayName;
     }
+
+    @Override
+    public String toString() {
+        return displayName;
+    }
 }
