@@ -22,27 +22,13 @@ import java.util.HashMap;
 import java.util.UUID;
 
 import cz.mff.mobapp.auth.AccountUtils;
+import cz.mff.mobapp.event.TryCatch;
 import cz.mff.mobapp.gui.ServiceLocator;
+import cz.mff.mobapp.model.Contact;
+import cz.mff.mobapp.sync.SystemContactStorage.ContactEntry;
 
 public class ContactsFragment extends Fragment {
 
-
-    private class ContactEntry {
-        final long id;
-        final String name;
-        final UUID uuid;
-
-        ContactEntry(long id, String name, UUID uuid) {
-            this.id = id;
-            this.name = name;
-            this.uuid = uuid;
-        }
-
-        @Override
-        public String toString() {
-            return name;
-        }
-    }
 
     private ServiceLocator serviceLocator = null;
     private ContentResolver contentResolver = null;
@@ -51,8 +37,6 @@ public class ContactsFragment extends Fragment {
     private ViewGroup rootView;
 
     private ListView contactList;
-
-    private ArrayList<ContactEntry> entries;
 
     void initialize(Context context, ServiceLocator serviceLocator, ContentResolver contentResolver) {
         this.context = context;
@@ -68,75 +52,33 @@ public class ContactsFragment extends Fragment {
         contactList = rootView.findViewById(R.id.fragment_contact_list);
         contactList.setEmptyView(rootView.findViewById(R.id.fragment_contact_list_empty));
 
-        loadContacts();
-
         return rootView;
     }
 
     @Override
-    public void onStart() {
-        super.onStart();
+    public void onResume() {
+        super.onResume();
+        serviceLocator.getContactAPIManager().listAll(new TryCatch<>(this::loadContacts, Throwable::printStackTrace));
     }
 
-    private void startContactActivity(ContactEntry entry, Class<?> activityClass) {
+    private void startContactActivity(Contact entry, Class<?> activityClass) {
         Intent intent = new Intent(context, activityClass);
-        intent.putExtra("id", entry.id);
-        intent.putExtra("uuid", entry.uuid);
+        intent.putExtra("uuid", entry.getId());
         startActivity(intent);
     }
 
-    public static final String[] RAW_PROJECTION = {
-            ContactsContract.RawContacts.CONTACT_ID,
-            ContactsContract.RawContacts.SOURCE_ID,
-    };
-
-    public static final String[] CONTACTS_PROJECTION = {
-            ContactsContract.Contacts._ID,
-            ContactsContract.Contacts.DISPLAY_NAME_PRIMARY
-    };
-
-    private void loadContacts() {
-        final String accountName = serviceLocator.getAccountSession().getAccountName();
-        final Cursor rawContacts = contentResolver.query(ContactsContract.RawContacts.CONTENT_URI.buildUpon()
-                        .appendQueryParameter(ContactsContract.RawContacts.ACCOUNT_TYPE, AccountUtils.ACCOUNT_TYPE)
-                        .appendQueryParameter(ContactsContract.RawContacts.ACCOUNT_NAME, accountName)
-                        .build(),
-                RAW_PROJECTION,
-                null, null, null);
-
-        HashMap<Long, String> contactIds = new HashMap<>();
-        entries = new ArrayList<>();
-        while (rawContacts.moveToNext()) {
-            contactIds.put(rawContacts.getLong(0), rawContacts.getString(1));
+    private void loadContacts(ArrayList<Contact> entries) {
+        if (entries.isEmpty()) {
+            contactList.setEmptyView(rootView.findViewById(R.id.fragment_contact_list_empty));
+            return;
         }
 
-        rawContacts.close();
-
-        final Cursor contacts = contentResolver.query(ContactsContract.Contacts.CONTENT_URI,
-                CONTACTS_PROJECTION,
-                null, null, ContactsContract.Contacts.DISPLAY_NAME_PRIMARY + " ASC");
-
-        while (contacts.moveToNext()) {
-            long id = contacts.getLong(0);
-            String uuid = contactIds.get(id);
-            if (uuid == null) {
-                Log.v("ContactsFragment", "Filtering contact " + contacts.getString(1));
-                continue;
-            }
-            ContactEntry entry = new ContactEntry(id, contacts.getString(1), UUID.fromString(uuid));
-            entries.add(entry);
-        }
-
-        contacts.close();
-
-        if (entries.isEmpty()) return;
-
-        final ArrayAdapter<ContactEntry> adapter = new ArrayAdapter<ContactEntry>(context, R.layout.list_item_share_edit, R.id.item_text, entries) {
+        final ArrayAdapter<Contact> adapter = new ArrayAdapter<Contact>(context, R.layout.list_item_share_edit, R.id.item_text, entries) {
             @NonNull
             @Override
             public View getView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {
                 View view = super.getView(position, convertView, parent);
-                ContactEntry entry = entries.get(position);
+                Contact entry = entries.get(position);
 
                 view.findViewById(R.id.item_text)
                         .setOnClickListener(l -> startContactActivity(entry, ContactDetailActivity.class));

@@ -97,4 +97,9 @@ public final class Contact extends Bundle {
     public ArrayList<ContactInfo> getContactInfos() {
         return contactInfos;
     }
+
+    @Override
+    public String toString() {
+        return label;
+    }
 }
