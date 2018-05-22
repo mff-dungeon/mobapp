@@ -11,13 +11,15 @@ import android.widget.ImageView;
 import com.google.zxing.WriterException;
 import com.google.zxing.common.BitMatrix;
 
+import java.util.UUID;
+
 public class ShareTicketActivity extends Activity {
 
     public static final String TICKET_ID = "cz.mff.mobapp.ShareTicketActivity.TICKET_ID";
     private static final String QR_TEXT_FORMAT = "http://mobapp-server.herokuapp.com/subscribe/%s/";
     private static final int QR_SIZE = 1024;
 
-    private String ticketId;
+    private UUID ticketId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -25,7 +27,7 @@ public class ShareTicketActivity extends Activity {
         setContentView(R.layout.activity_share_ticket);
 
         Intent intent = getIntent();
-        ticketId = intent.getStringExtra(TICKET_ID);
+        ticketId = (UUID) intent.getSerializableExtra(TICKET_ID);
 
         try {
             generateQrCode();
@@ -37,7 +39,7 @@ public class ShareTicketActivity extends Activity {
     }
 
     private void generateQrCode() throws WriterException {
-        BitMatrix matrix = QrCodeGenerator.generateMatrix(String.format(QR_TEXT_FORMAT, ticketId), QR_SIZE);
+        BitMatrix matrix = QrCodeGenerator.generateMatrix(String.format(QR_TEXT_FORMAT, String.valueOf(ticketId)), QR_SIZE);
         Bitmap bitmap = QrCodeGenerator.drawMatrix(matrix, Color.WHITE, Color.BLACK);
 
         ImageView imageView = findViewById(R.id.qrCodeView);

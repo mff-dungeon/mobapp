@@ -3,9 +3,13 @@ package cz.mff.mobapp;
 import android.app.Activity;
 import android.content.Intent;
 import android.widget.TextView;
+import android.widget.Toast;
+
+import org.json.JSONObject;
 
 import java.util.UUID;
 
+import cz.mff.mobapp.api.Requester;
 import cz.mff.mobapp.event.TryCatch;
 import cz.mff.mobapp.gui.ServiceLocator;
 import cz.mff.mobapp.model.Bundle;
@@ -14,7 +18,7 @@ import cz.mff.mobapp.model.Manager;
 
 public class ShareBundleActivity extends Activity implements AuthenticatedActivity {
 
-    private ServiceLocator serviceLocator;
+    Requester requester;
     private UUID uuid;
 
     @Override
@@ -35,12 +39,23 @@ public class ShareBundleActivity extends Activity implements AuthenticatedActivi
     public void onAuthenticated() {
         // TODO: offer customization (editable, shareable, ...)
 
-        // TODO: find proper ticket ID
-        final UUID ticketId = UUID.fromString("41795d9e-3cc9-4771-b88a-b0099516a753");
+        try {
+            JSONObject req = new JSONObject();
+            req.put("lost", "thegame");
 
-        Intent intent = new Intent(this, ShareTicketActivity.class);
-        intent.putExtra(ShareTicketActivity.TICKET_ID, ticketId);
-        startActivity(intent);
+            requester.postRequest("bundles/" + String.valueOf(uuid) + "/token/", req, new TryCatch<>(
+                    resp -> {
+                        final UUID ticketId = UUID.fromString(resp.getObjectData().getString("id"));
+
+                        Intent intent = new Intent(this, ShareTicketActivity.class);
+                        intent.putExtra(ShareTicketActivity.TICKET_ID, ticketId);
+                        startActivity(intent);
+                    }, this::handleError
+            ));
+
+        } catch (Exception e) {
+            handleError(e);
+        }
     }
 
     @Override
@@ -50,6 +65,12 @@ public class ShareBundleActivity extends Activity implements AuthenticatedActivi
 
     @Override
     public void setServiceLocator(ServiceLocator serviceLocator) {
-        this.serviceLocator = serviceLocator;
+        this.requester = serviceLocator.getRequester();
+    }
+
+    private void handleError(Exception e) {
+        e.printStackTrace();
+        Toast.makeText(this, "Error: " + e.getMessage(), Toast.LENGTH_LONG).show();
+        finish();
     }
 }

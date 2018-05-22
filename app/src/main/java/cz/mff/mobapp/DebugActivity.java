@@ -23,11 +23,11 @@ import cz.mff.mobapp.gui.ServiceLocator;
 import cz.mff.mobapp.model.Contact;
 import cz.mff.mobapp.model.Manager;
 
-public class MainActivity extends Activity implements ExceptionListener, AuthenticatedActivity {
+public class DebugActivity extends Activity implements ExceptionListener, AuthenticatedActivity {
 
     public static final String UPDATE_DONE = "cz.mff.mobapp.UPDATE_DONE";
 
-    private static final String TAG = "MainActivity";
+    private static final String TAG = "DebugActivity";
 
     private ServiceLocator serviceLocator;
     private Manager<Contact, UUID> manager;
@@ -65,12 +65,6 @@ public class MainActivity extends Activity implements ExceptionListener, Authent
     @Override
     public void onAuthenticated() {
         manager = serviceLocator.getContactAPIManager();
-
-        boolean handled = tryHandleIntent(getIntent());
-        if (!handled) {
-            askUserForTicketId();
-        }
-
         NdefUtils.shareUrl(this, Uri.encode("http://www.google.com/"));
     }
 
@@ -89,53 +83,6 @@ public class MainActivity extends Activity implements ExceptionListener, Authent
 
     private void askUserForTicketId() {
         // TODO: show some kind of UI to retrieve ticket ID, then call subscribeToTicket()
-    }
-
-    private void subscribeToTicket(String ticketId) {
-        System.out.printf("cloning ticket %s\n", ticketId);
-        serviceLocator.getRequester().putRequest(String.format(APIEndpoints.CLONE_ENDPOINT, ticketId), new JSONObject(),
-                new TryCatch<>(response -> {
-                    JSONObject data = response.getObjectData();
-                    System.out.printf("ticket clone succeeded, clone has id: %s\n", data.get("id"));
-
-                    // TODO: sync data store from the backend
-                }, err -> {
-                    System.out.println("ticket clone failed");
-
-                    // TODO: show UI to indicate failure
-                }));
-    }
-
-    private boolean tryHandleIntent(Intent intent) {
-        if (intent == null) {
-            // no intent provided
-            return false;
-        }
-
-        String action = intent.getAction();
-        Uri data = intent.getData();
-
-        if (Intent.ACTION_VIEW.equals(action) && data != null) {
-            String ticketId = data.getLastPathSegment();
-            subscribeToTicket(ticketId);
-            return true;
-        } else if (NfcAdapter.ACTION_NDEF_DISCOVERED.equals(action)) {
-            Parcelable[] rawMessages = intent.getParcelableArrayExtra(NfcAdapter.EXTRA_NDEF_MESSAGES);
-
-            if (rawMessages != null) {
-                for (Parcelable rawMessage : rawMessages) {
-                    NdefMessage message = (NdefMessage) rawMessage;
-
-                    for (NdefRecord record : message.getRecords()) {
-                        String payloadString = new String(record.getPayload());
-                        System.out.println("have record: " + payloadString);
-                    }
-                }
-            }
-            return true;
-        }
-
-        return false;
     }
 
     private void createDeleteBundle() {
@@ -166,14 +113,6 @@ public class MainActivity extends Activity implements ExceptionListener, Authent
         ((TextView) findViewById(R.id.errorText)).setText(e.getMessage());
     }
 
-    protected void onNewIntent(Intent intent) {
-        super.onNewIntent(intent);
-
-        boolean handled = tryHandleIntent(intent);
-        if (!handled) {
-            askUserForTicketId();
-        }
-    }
 
     private void shareTicket(String ticketId) {
         Intent intent = new Intent(this, ShareTicketActivity.class);

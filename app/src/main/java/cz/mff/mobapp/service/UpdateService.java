@@ -9,7 +9,7 @@ import android.os.SystemClock;
 import android.support.annotation.Nullable;
 import android.support.v4.content.LocalBroadcastManager;
 
-import cz.mff.mobapp.MainActivity;
+import cz.mff.mobapp.DebugActivity;
 
 public class UpdateService extends IntentService {
 
@@ -34,7 +34,7 @@ public class UpdateService extends IntentService {
             updateDatabase();
         }
         if (intent.hasExtra("requestId")) {
-            Intent reply = new Intent(MainActivity.UPDATE_DONE);
+            Intent reply = new Intent(DebugActivity.UPDATE_DONE);
             reply.putExtra("requestId", intent.getStringExtra("requestId"));
             LocalBroadcastManager.getInstance(this).sendBroadcast(reply);
         }

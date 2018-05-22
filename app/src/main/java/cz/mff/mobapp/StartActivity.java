@@ -11,7 +11,12 @@ import android.app.FragmentTransaction;
 import android.content.ContentResolver;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.net.Uri;
+import android.nfc.NdefMessage;
+import android.nfc.NdefRecord;
+import android.nfc.NfcAdapter;
 import android.os.Bundle;
+import android.os.Parcelable;
 import android.support.annotation.NonNull;
 import android.support.v13.app.FragmentPagerAdapter;
 import android.support.v4.app.ActivityCompat;
@@ -22,7 +27,11 @@ import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import org.json.JSONObject;
+
+import cz.mff.mobapp.api.APIEndpoints;
 import cz.mff.mobapp.auth.AccountUtils;
+import cz.mff.mobapp.event.TryCatch;
 import cz.mff.mobapp.gui.ServiceLocator;
 
 public class StartActivity extends Activity implements ActionBar.TabListener, AuthenticatedActivity {
@@ -188,6 +197,8 @@ public class StartActivity extends Activity implements ActionBar.TabListener, Au
         ActivityCompat.requestPermissions(this,
                 new String[]{Manifest.permission.READ_CONTACTS, Manifest.permission.WRITE_CONTACTS},
                 PERMISSION_REQUEST_READ_CONTACTS);
+
+        tryHandleIntent(getIntent());
     }
 
     @Override
@@ -237,5 +248,59 @@ public class StartActivity extends Activity implements ActionBar.TabListener, Au
             }
             return null;
         }
+    }
+
+    private void subscribeToTicket(String ticketId) {
+        System.out.printf("cloning ticket %s\n", ticketId);
+        serviceLocator.getRequester().putRequest(String.format(APIEndpoints.CLONE_ENDPOINT, ticketId), new JSONObject(),
+                new TryCatch<>(response -> {
+                    JSONObject data = response.getObjectData();
+                    System.out.printf("ticket clone succeeded, clone has id: %s\n", data.get("id"));
+
+                    // TODO: sync data store from the backend
+                }, err -> {
+                    System.out.println("ticket clone failed");
+
+                    // TODO: show UI to indicate failure
+                }));
+    }
+
+    private boolean tryHandleIntent(Intent intent) {
+        if (intent == null) {
+            // no intent provided
+            return false;
+        }
+
+        String action = intent.getAction();
+        Uri data = intent.getData();
+
+        if (Intent.ACTION_VIEW.equals(action) && data != null) {
+            String ticketId = data.getLastPathSegment();
+            subscribeToTicket(ticketId);
+            return true;
+        } else if (NfcAdapter.ACTION_NDEF_DISCOVERED.equals(action)) {
+            Parcelable[] rawMessages = intent.getParcelableArrayExtra(NfcAdapter.EXTRA_NDEF_MESSAGES);
+
+            if (rawMessages != null) {
+                for (Parcelable rawMessage : rawMessages) {
+                    NdefMessage message = (NdefMessage) rawMessage;
+
+                    for (NdefRecord record : message.getRecords()) {
+                        String payloadString = new String(record.getPayload());
+                        System.out.println("have record: " + payloadString);
+                    }
+                }
+            }
+            return true;
+        }
+
+        return false;
+    }
+
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+
+        tryHandleIntent(intent);
+        // TODO: error here
     }
 }

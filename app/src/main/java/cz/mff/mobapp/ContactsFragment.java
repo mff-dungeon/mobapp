@@ -31,7 +31,6 @@ public class ContactsFragment extends Fragment {
 
 
     private ServiceLocator serviceLocator = null;
-    private ContentResolver contentResolver = null;
     private Context context;
 
     private ViewGroup rootView;
@@ -41,7 +40,6 @@ public class ContactsFragment extends Fragment {
     void initialize(Context context, ServiceLocator serviceLocator, ContentResolver contentResolver) {
         this.context = context;
         this.serviceLocator = serviceLocator;
-        this.contentResolver = contentResolver;
     }
 
     @Nullable
@@ -92,6 +90,7 @@ public class ContactsFragment extends Fragment {
         };
 
         contactList.setAdapter(adapter);
+        contactList.invalidate();
     }
 
 }
